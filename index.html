@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fur & Bubbles Grooming Services - Appointment Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TOP BAR (Above Navigation) -->
+  <div class="top-bar">
+    <div class="top-bar-links">
+      <a href="javascript:void(0)" onclick="App.routeTo('about-view')">About Us</a>
+      <a href="javascript:void(0)" onclick="App.routeTo('faqs-view')">FAQs</a>
+      <a href="javascript:void(0)" onclick="App.routeTo('contact-view')">Contact Us</a>
+      <a href="javascript:void(0)" onclick="App.routeTo('terms-view')">Terms & Conditions</a>
+      <a href="javascript:void(0)" onclick="App.routeTo('privacy-view')">Privacy Policy</a>
+    </div>
+    <div class="top-bar-info">
+      <span>📍 Davila St., Navotas City, Philippines</span>
+      <span>⏰ 7:00 AM – 9:00 PM</span>
+    </div>
+  </div>
+
+  <!-- MAIN HEADER & NAVIGATION -->
+  <header class="main-header">
+    <div class="navbar">
+      <div class="logo-container" onclick="App.routeTo('home-view')">
+        <div class="logo-icon-svg">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z" style="display:none;"/>
+            <path d="M12 7c-1.66 0-3 1.34-3 3 0 .7.24 1.35.65 1.86l-.65 1.14h6l-.65-1.14c.41-.51.65-1.16.65-1.86 0-1.66-1.34-3-3-3z"/>
+            <circle cx="8" cy="8" r="1.5" />
+            <circle cx="16" cy="8" r="1.5" />
+            <circle cx="5.5" cy="11.5" r="1.5" />
+            <circle cx="18.5" cy="11.5" r="1.5" />
+            <path d="M9 16c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-2-3-2-3 .34-3 2z"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">Fur & Bubbles</span>
+          <span class="logo-subtitle">Grooming Services • Navotas</span>
+        </div>
+      </div>
+
+      <!-- Center Nav Links -->
+      <ul class="nav-links">
+        <li><a class="nav-link" data-view="home-view" onclick="App.routeTo('home-view')">Home</a></li>
+        <li><a class="nav-link" data-view="services-view" onclick="App.routeTo('services-view')">Services & Pricelist</a></li>
+        
+        <!-- Only shown when signed in -->
+        <li class="nav-auth-only" style="display:none;">
+          <a class="nav-link" data-view="my-bookings-view" onclick="App.routeTo('my-bookings-view')">
+            My Bookings <span class="badge" id="myBookingsCountBadge" style="display:none;">0</span>
+          </a>
+        </li>
+        <li class="nav-auth-only" style="display:none;">
+          <a class="nav-link" data-view="booking-history-view" onclick="App.routeTo('booking-history-view')">Booking History</a>
+        </li>
+      </ul>
+
+      <!-- Right Actions (Guest vs Logged In) -->
+      <div class="nav-actions">
+        <!-- Guest Login Button -->
+        <button class="btn btn-outline btn-sm nav-guest-only" onclick="App.routeTo('booking-view'); App.setupBookingStep(3);">
+          Sign In
+        </button>
+
+        <!-- Account Dropdown (When Logged In) -->
+        <div class="account-menu-container nav-auth-only" style="display:none;">
+          <button class="account-btn" id="accountMenuToggleBtn">
+            <div class="account-avatar-small" id="navUserAvatarInitials">M</div>
+            <span id="navUserNameDisplay">Account</span>
+            <span style="font-size:0.7rem;">▼</span>
+          </button>
+          
+          <div class="account-dropdown" id="accountDropdown">
+            <div class="account-dropdown-header">
+              <div class="dropdown-user-name" id="dropdownUserName">Customer Profile</div>
+              <div class="dropdown-user-email" id="navUserEmailDisplay">user@example.com</div>
+            </div>
+            <a href="javascript:void(0)" onclick="App.routeTo('profile-view')">
+              <span>👤</span> Manage Account
+            </a>
+            <a href="javascript:void(0)" onclick="App.routeTo('profile-view')">
+              <span>🐾</span> My Pets
+            </a>
+            <a href="javascript:void(0)" onclick="App.routeTo('faqs-view')">
+              <span>❓</span> Help Center
+            </a>
+            <button class="logout-item" onclick="App.handleLogout()">
+              <span>🚪</span> Log Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Primary Book Now CTA -->
+        <button class="btn btn-primary" onclick="App.startNewBooking()">
+          <span>📅</span> Book Now
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="main-content">
+
+    <!-- 1. HOME VIEW (Wireframe inspired: WELCOME! HI, CAPAWLONG! BOOK NOW!) -->
+    <section id="home-view" class="view-section active">
+      <div class="hero-card">
+        <!-- Retro TV Mascot from Proposal -->
+        <div class="hero-tv-mascot">
+          <div class="hero-tv-antenna"></div>
+          <div class="hero-tv-screen">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="14" r="5" />
+              <circle cx="8" cy="9" r="2" />
+              <circle cx="16" cy="9" r="2" />
+              <circle cx="5" cy="13" r="1.5" />
+              <circle cx="19" cy="13" r="1.5" />
+            </svg>
+          </div>
+          <div class="hero-tv-dials">
+            <div class="dial"></div>
+            <div class="dial"></div>
+          </div>
+        </div>
+
+        <h1 class="hero-welcome-title">WELCOME!</h1>
+        <div class="hero-greeting" id="homeGreetingText">HI, CAPAWLONG!</div>
+        <p class="hero-description">
+          Welcome to Fur & Bubbles Grooming Services in Davila St., Navotas City. 
+          Experience our transparent shift-based booking system with real-time slot availability, 
+          guaranteeing a stress-free grooming session for your beloved dogs and cats.
+        </p>
+        <button class="btn btn-primary btn-lg" onclick="App.startNewBooking()" style="font-size:1.2rem; padding:14px 36px;">
+          🐾 BOOK NOW!
+        </button>
+      </div>
+
+      <!-- 4 Core Functional Sections (Discover, Book a Service, Manage, Account) -->
+      <div class="section-grid">
+        <div class="hub-card" onclick="App.routeTo('services-view')">
+          <div>
+            <div class="hub-icon blue">📋</div>
+            <h3>Discover</h3>
+            <p>Explore our transparent grooming packages, à la carte services, and add-on pricelist based on your pet's size.</p>
+          </div>
+          <button class="btn btn-outline btn-sm">View Pricelist</button>
+        </div>
+
+        <div class="hub-card" onclick="App.startNewBooking()">
+          <div>
+            <div class="hub-icon yellow">📅</div>
+            <h3>Book a Service</h3>
+            <p>Reserve one of 3 daily shifts (max 3 pets per shift) with real-time availability and simulated payment.</p>
+          </div>
+          <button class="btn btn-accent btn-sm">Book Appointment</button>
+        </div>
+
+        <div class="hub-card" onclick="App.routeTo('my-bookings-view')">
+          <div>
+            <div class="hub-icon green">🗓️</div>
+            <h3>Manage</h3>
+            <p>View upcoming appointments, reschedule date/shift without extra fees, or cancel with 24h refund guarantee.</p>
+          </div>
+          <button class="btn btn-primary btn-sm">My Bookings</button>
+        </div>
+
+        <div class="hub-card" onclick="App.routeTo('profile-view')">
+          <div>
+            <div class="hub-icon red">👤</div>
+            <h3>Account</h3>
+            <p>Manage your pet profiles, care notes, uploaded photos, and account credentials all in one organized place.</p>
+          </div>
+          <button class="btn btn-navy btn-sm">Manage Profile</button>
+        </div>
+      </div>
+
+      <!-- Daily Shifts & Capacity Transparency Banner -->
+      <div class="alert alert-info" style="align-items:center;">
+        <div style="font-size:2rem;">⏰</div>
+        <div>
+          <strong>Daily Shift Capacity Management (3 Pets Maximum Per Shift):</strong><br>
+          Shift 1: <strong>7:00 AM – 11:00 AM</strong> | Break: 11:00 AM – 12:00 NN | 
+          Shift 2: <strong>12:00 NN – 4:00 PM</strong> | Break: 4:00 PM – 5:00 PM | 
+          Shift 3: <strong>5:00 PM – 9:00 PM</strong>.<br>
+          <em>Handled by our 3 skilled groomers (Jannel, Jenn, and Emman) and 2 assistants (Mike and Jess).</em>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SERVICES & PRICELIST VIEW (Tables 3, 4, 5, 6) -->
+    <section id="services-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>Services & Pricelist</h2>
+          <p style="color:var(--color-text-muted);">Transparent grooming prices based on weight category. Dogs and Cats only.</p>
+        </div>
+        <button class="btn btn-primary" onclick="App.startNewBooking()">Book an Appointment</button>
+      </div>
+
+      <!-- Size Category Reference (Table 6) -->
+      <div class="pet-weight-calculator-box" style="margin-bottom:28px;">
+        <h4 style="margin-bottom:8px; color:var(--color-navy);">Pet Size Categories & Weight Ranges (Table 6)</h4>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <span class="size-category-badge badge-small">Small: 10 kg and below</span>
+          <span class="size-category-badge badge-medium">Medium: Above 10 kg up to 25 kg</span>
+          <span class="size-category-badge badge-large">Large: Above 25 kg up to 30 kg</span>
+          <span class="size-category-badge badge-giant">Giant: Above 30 kg (No upper limit)</span>
+        </div>
+      </div>
+
+      <!-- Table 5: Grooming Packages -->
+      <h3 style="margin-bottom:12px; color:var(--color-navy);">1. Grooming Packages (Inclusions & Pricing)</h3>
+      <div style="overflow-x:auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th>Inclusions</th>
+              <th>Small (≤10kg)</th>
+              <th>Medium (10-25kg)</th>
+              <th>Large (25-30kg)</th>
+              <th>Giant (>30kg)</th>
+            </tr>
+          </thead>
+          <tbody id="pricelistPackagesTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table 3: À La Carte Services -->
+      <h3 style="margin:24px 0 12px; color:var(--color-navy);">2. À La Carte Individual Services</h3>
+      <div style="overflow-x:auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Small (≤10kg)</th>
+              <th>Medium (10-25kg)</th>
+              <th>Large (25-30kg)</th>
+              <th>Giant (>30kg)</th>
+            </tr>
+          </thead>
+          <tbody id="pricelistAlaCarteTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table 4: Add-on Services -->
+      <h3 style="margin:24px 0 12px; color:var(--color-navy);">3. Add-on Services (Optional Enhancements)</h3>
+      <div style="overflow-x:auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Add-on Service & Notes</th>
+              <th>Small (≤10kg)</th>
+              <th>Medium (10-25kg)</th>
+              <th>Large (25-30kg)</th>
+              <th>Giant (>30kg)</th>
+            </tr>
+          </thead>
+          <tbody id="pricelistAddonsTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="alert alert-warning">
+        <div>
+          <strong>Pricing Rules & Notes:</strong><br>
+          • Customers select either <strong>one grooming package</strong> OR <strong>one or more à la carte services</strong>, not both.<br>
+          • <strong>Organic Shampoo Upgrade</strong> is already included in <em>Spa Grooming</em> and will not be charged or counted again.<br>
+          • <strong>Animals with Disability (AWD):</strong> Eligible for an automatic 20% demonstration discount upon declaring special needs during booking.
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. STEP-BY-STEP BOOKING FLOW VIEW -->
+    <section id="booking-view" class="view-section">
+      
+      <!-- Stepper Progress Bar -->
+      <div class="stepper-wrapper">
+        <div class="step-item active" id="stepperItem1" onclick="App.setupBookingStep(1)">
+          <div class="step-circle">1</div>
+          <span class="step-label">Services</span>
+        </div>
+        <div class="step-item" id="stepperItem2" onclick="App.setupBookingStep(2)">
+          <div class="step-circle">2</div>
+          <span class="step-label">Schedule</span>
+        </div>
+        <div class="step-item" id="stepperItem3" onclick="App.setupBookingStep(3)">
+          <div class="step-circle">3</div>
+          <span class="step-label">Account</span>
+        </div>
+        <div class="step-item" id="stepperItem4" onclick="App.setupBookingStep(4)">
+          <div class="step-circle">4</div>
+          <span class="step-label">Pet Details</span>
+        </div>
+        <div class="step-item" id="stepperItem5" onclick="App.setupBookingStep(5)">
+          <div class="step-circle">5</div>
+          <span class="step-label">Review</span>
+        </div>
+        <div class="step-item" id="stepperItem6">
+          <div class="step-circle">6</div>
+          <span class="step-label">Payment</span>
+        </div>
+      </div>
+
+      <!-- ================= STEP 1: SELECT SERVICES ================= -->
+      <div id="bookingStep1" class="booking-wizard-step active">
+        <div class="step-header">
+          <div>
+            <h2>Step 1: Select Services & Pet Weight</h2>
+            <p style="color:var(--color-text-muted);">Choose a Grooming Package or custom À La Carte services.</p>
+          </div>
+        </div>
+
+        <!-- Weight & Size Category Calculator Box -->
+        <div class="pet-weight-calculator-box">
+          <div class="pet-weight-grid">
+            <div>
+              <label class="form-label" for="inputPetWeight">Pet Weight (Kilograms)</label>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <input type="number" id="inputPetWeight" class="form-input" value="5.0" min="0.5" max="120" step="0.5" oninput="App.onWeightChanged()">
+                <span style="font-weight:700;">kg</span>
+              </div>
+              <label style="font-size:0.85rem; color:#555; display:inline-flex; align-items:center; gap:6px; margin-top:6px; cursor:pointer;">
+                <input type="checkbox" id="checkWeightEstimated" onchange="App.bookingDraft.isWeightEstimated = this.checked">
+                Weight is an estimate
+              </label>
+            </div>
+            <div>
+              <span class="form-label">Automatically Assigned Size Category:</span>
+              <div id="assignedSizeBadge" class="size-category-badge badge-small">Small (Automatic)</div>
+              <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:4px;">
+                Prices and service durations adjust automatically based on size category.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Type Pill (Package vs À La Carte) -->
+        <div class="tab-pill-container">
+          <div class="tab-pill active" id="tabBookingPackage" onclick="App.selectPackage('basic_grooming')">
+            Grooming Package
+          </div>
+          <div class="tab-pill" id="tabBookingAlaCarte" onclick="App.toggleAlaCarte('bath_blowdry')">
+            À La Carte Services
+          </div>
+        </div>
+
+        <!-- Package Selection Section -->
+        <div id="packageSelectionContainer">
+          <h4 style="margin-bottom:12px; color:var(--color-navy);">Choose One Grooming Package:</h4>
+          <div class="service-cards-grid" id="packagesCardsList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- À La Carte Selection Section -->
+        <div id="alaCarteSelectionContainer" style="display:none;">
+          <h4 style="margin-bottom:12px; color:var(--color-navy);">Select One or More À La Carte Services:</h4>
+          <div id="alaCarteCheckboxList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Optional Add-ons Section -->
+        <div style="margin-top:28px;">
+          <h4 style="margin-bottom:12px; color:var(--color-navy);">Optional Add-on Enhancements:</h4>
+          <div id="addonsCheckboxList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- 240-Minute Duration Warning Banner -->
+        <div id="durationExceededWarning" class="alert alert-danger" style="display:none; margin-top:20px;">
+          Estimated grooming duration exceeds the 240-minute (4-hour) shift limit!
+        </div>
+
+        <!-- Live Running Estimate Bar -->
+        <div class="running-selection-summary">
+          <div class="running-summary-details">
+            <div class="running-stat">
+              <span class="running-stat-label">Size Category</span>
+              <span class="running-stat-value" id="runningSummarySize">Small</span>
+            </div>
+            <div class="running-stat">
+              <span class="running-stat-label">Est. Duration (Max 240m)</span>
+              <span class="running-stat-value" id="runningSummaryDuration">40 / 240 mins</span>
+            </div>
+            <div class="running-stat">
+              <span class="running-stat-label">Estimated Total Price</span>
+              <span class="running-stat-value" id="runningSummaryPrice">₱450</span>
+            </div>
+          </div>
+          <button class="btn btn-accent btn-lg" id="btnServiceStepNext" onclick="App.setupBookingStep(2)">
+            Continue to Schedule ➔
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= STEP 2: APPOINTMENT SCHEDULE ================= -->
+      <div id="bookingStep2" class="booking-wizard-step">
+        <div class="step-header">
+          <div>
+            <h2>Step 2: Choose Appointment Date & Shift</h2>
+            <p style="color:var(--color-text-muted);">Real-time shift availability (Maximum 3 pets per shift).</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="App.setupBookingStep(1)">← Back to Services</button>
+        </div>
+
+        <div class="schedule-container">
+          <!-- Calendar Card -->
+          <div class="calendar-card">
+            <div class="calendar-header">
+              <button class="calendar-nav-btn" onclick="App.prevCalendarMonth()">‹</button>
+              <div class="calendar-title" id="calendarMonthYearTitle">Month Year</div>
+              <button class="calendar-nav-btn" onclick="App.nextCalendarMonth()">›</button>
+            </div>
+
+            <div class="calendar-grid">
+              <div class="calendar-day-name">Sun</div>
+              <div class="calendar-day-name">Mon</div>
+              <div class="calendar-day-name">Tue</div>
+              <div class="calendar-day-name">Wed</div>
+              <div class="calendar-day-name">Thu</div>
+              <div class="calendar-day-name">Fri</div>
+              <div class="calendar-day-name">Sat</div>
+            </div>
+            <div class="calendar-grid" id="calendarDaysGrid" style="margin-top:6px;">
+              <!-- Generated by JS -->
+            </div>
+
+            <div style="margin-top:16px; padding-top:12px; border-top:1px solid #eee; font-size:0.85rem; color:#666;">
+              <strong>Selected Date:</strong> <span id="selectedDateDisplaySummary" style="color:var(--color-navy); font-weight:700;">Please select a date</span>
+            </div>
+          </div>
+
+          <!-- Shifts Panel (3 Bookable Shifts + Breaks) -->
+          <div class="shifts-panel">
+            <h4 style="color:var(--color-navy); margin-bottom:4px;">Available Grooming Shifts</h4>
+            <p style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:8px;">
+              Select a 4-hour grooming shift for your pet:
+            </p>
+
+            <div id="shiftsSelectionList">
+              <!-- Rendered by JS with remaining capacities -->
+            </div>
+
+            <div style="margin-top:auto; padding-top:16px;">
+              <button class="btn btn-primary btn-lg" id="btnScheduleStepNext" style="width:100%;" onclick="App.setupBookingStep(3)">
+                Continue to Account & Pet Form ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= STEP 3: SIGN IN / CREATE ACCOUNT ================= -->
+      <div id="bookingStep3" class="booking-wizard-step">
+        <div class="step-header">
+          <div>
+            <h2>Step 3: Customer Sign In / Register</h2>
+            <p style="color:var(--color-text-muted);">Your selected services, date, and shift are securely saved.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="App.setupBookingStep(2)">← Back to Schedule</button>
+        </div>
+
+        <div style="max-width:500px; margin:0 auto;">
+          <div class="tab-pill-container" style="max-width:100%; margin-bottom:20px;">
+            <div class="tab-pill active" id="tabAuthLogin" onclick="App.switchAuthTab('login')">Sign In</div>
+            <div class="tab-pill" id="tabAuthRegister" onclick="App.switchAuthTab('register')">Create Account</div>
+          </div>
+
+          <!-- LOGIN FORM -->
+          <form id="authLoginForm" onsubmit="App.handleLogin(event)">
+            <div class="form-group">
+              <label class="form-label" for="loginEmailInput">Email Address</label>
+              <input type="email" id="loginEmailInput" class="form-input" required value="capawlong@gmail.com" placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label class="form-label" for="loginPasswordInput">Password</label>
+                <a href="javascript:void(0)" onclick="App.handleForgotPassword()" style="font-size:0.8rem; font-weight:700;">Forgot Password?</a>
+              </div>
+              <input type="password" id="loginPasswordInput" class="form-input" required value="password123" placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Sign In & Continue</button>
+
+            <!-- Simulated OAuth -->
+            <div class="oauth-divider">OR</div>
+            <div class="oauth-btn-group">
+              <button type="button" class="btn btn-social" onclick="App.simulatedOAuth('Google')">
+                <span>🌐</span> Continue with Google (Simulated)
+              </button>
+              <button type="button" class="btn btn-social" onclick="App.simulatedOAuth('Apple')">
+                <span>🍎</span> Continue with Apple (Simulated)
+              </button>
+            </div>
+          </form>
+
+          <!-- REGISTER FORM -->
+          <form id="authRegisterForm" style="display:none;" onsubmit="App.handleRegister(event)">
+            <div class="form-group">
+              <label class="form-label" for="regNameInput">Full Name</label>
+              <input type="text" id="regNameInput" class="form-input" required placeholder="Juan Dela Cruz">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="regEmailInput">Email Address</label>
+              <input type="email" id="regEmailInput" class="form-input" required placeholder="juan@example.com">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regPasswordInput">Password</label>
+                <input type="password" id="regPasswordInput" class="form-input" required placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="regConfirmPasswordInput">Confirm Password</label>
+                <input type="password" id="regConfirmPasswordInput" class="form-input" required placeholder="••••••••">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regBirthdateInput">Birthdate</label>
+                <input type="date" id="regBirthdateInput" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="regPhoneInput">Phone Number</label>
+                <input type="tel" id="regPhoneInput" class="form-input" required placeholder="09171234567">
+              </div>
+            </div>
+            <div class="form-group">
+              <label style="font-size:0.85rem; display:flex; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="regAgreeCheckbox" required>
+                <span>I agree to the <a href="javascript:void(0)" onclick="App.routeTo('terms-view')" target="_blank">Terms and Conditions</a> and <a href="javascript:void(0)" onclick="App.routeTo('privacy-view')" target="_blank">Privacy Policy</a>.</span>
+              </label>
+            </div>
+            <button type="submit" class="btn btn-accent btn-lg" style="width:100%;">Create Account & Continue</button>
+
+            <!-- Simulated OAuth -->
+            <div class="oauth-divider">OR</div>
+            <div class="oauth-btn-group">
+              <button type="button" class="btn btn-social" onclick="App.simulatedOAuth('Google')">
+                <span>🌐</span> Continue with Google (Simulated)
+              </button>
+              <button type="button" class="btn btn-social" onclick="App.simulatedOAuth('Apple')">
+                <span>🍎</span> Continue with Apple (Simulated)
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ================= STEP 4: PET FORM ================= -->
+      <div id="bookingStep4" class="booking-wizard-step">
+        <div class="step-header">
+          <div>
+            <h2>Step 4: Pet Details & AWD Declaration</h2>
+            <p style="color:var(--color-text-muted);">Select a saved pet or register a new pet profile.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="App.setupBookingStep(2)">← Back to Schedule</button>
+        </div>
+
+        <!-- Saved Pet Profiles Quick Picker -->
+        <h4 style="margin-bottom:10px; color:var(--color-navy);">Choose Saved Pet or Register New:</h4>
+        <div class="saved-pet-selector-grid" id="savedPetsSelectorContainer">
+          <!-- Rendered by JS -->
+        </div>
+
+        <div style="background:#fcfcfc; border:1.5px solid var(--color-border); border-radius:var(--radius-md); padding:24px; margin-top:16px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="petFormName">Pet Name *</label>
+              <input type="text" id="petFormName" class="form-input" placeholder="e.g. Zeus" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Species *</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="petSpeciesRadio" id="speciesDog" value="Dog" checked> Dog
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="petSpeciesRadio" id="speciesCat" value="Cat"> Cat
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="petFormBreed">Breed *</label>
+              <input type="text" id="petFormBreed" class="form-input" placeholder="e.g. Persian, Golden Retriever, Shih Tzu" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="petFormWeight">Confirmed Weight (kg) *</label>
+              <input type="number" id="petFormWeight" class="form-input" min="0.5" max="120" step="0.5" oninput="App.onPetFormWeightChanged()" required>
+            </div>
+          </div>
+
+          <!-- Confirmed Category Info -->
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; background:#fff; padding:10px 14px; border-radius:8px; border:1px solid #eee;">
+            <span style="font-weight:700; font-size:0.9rem; color:var(--color-navy);">Confirmed Size Category:</span>
+            <span id="petFormConfirmedSize" class="size-category-badge badge-small">Small</span>
+            <small style="color:#666;">(Adjusting weight recalculates prices and service duration)</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petFormCareNotes">Care Notes & Special Instructions</label>
+            <textarea id="petFormCareNotes" class="form-textarea" placeholder="Skin sensitivities, matting issues, temperament, or behavioral notes..."></textarea>
+          </div>
+
+          <!-- Pet Photo Upload (Required for new profile) -->
+          <div class="form-group">
+            <label class="form-label">Pet Photo (Required for New Profile) *</label>
+            <div class="photo-upload-box" onclick="document.getElementById('petPhotoFileInput').click()">
+              <input type="file" id="petPhotoFileInput" style="display:none;" accept="image/png, image/jpeg" onchange="App.handlePetPhotoUpload(event)">
+              <div id="petPhotoPlaceholder">
+                <div style="font-size:2rem; margin-bottom:6px;">📷</div>
+                <strong>Click to Upload Pet Photo</strong><br>
+                <small style="color:#777;">Supports JPG, PNG (Max 5MB)</small>
+              </div>
+              <img id="petPhotoPreview" class="photo-preview-img" style="display:none;" alt="Pet Preview">
+            </div>
+          </div>
+
+          <!-- Animals with Disability (AWD) Discount Section -->
+          <div class="awd-box">
+            <label class="awd-checkbox-row">
+              <input type="checkbox" id="checkAwdDiscount" onchange="App.toggleAwdSection()">
+              <span>🐾 Animals with Disability (AWD) 20% Demonstration Discount</span>
+            </label>
+            <p style="font-size:0.85rem; color:#7d5203; margin:4px 0 0 28px;">
+              Fur & Bubbles provides a 20% demonstration discount for pets with special physical needs, mobility challenges, or diagnosed conditions.
+            </p>
+
+            <div id="awdDetailsBox" class="awd-details-expanded" style="display:none;">
+              <div class="form-group">
+                <label class="form-label" for="inputAwdCondition">Disability / Special Needs Condition Description *</label>
+                <textarea id="inputAwdCondition" class="form-textarea" placeholder="Please describe the condition or special handling required (e.g., three legs, blind, hip dysplasia)..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Optional Supporting Document (Medical Certificate / Vet Note)</label>
+                <input type="file" id="inputAwdDocument" class="form-input" accept=".pdf, image/jpeg, image/png" onchange="App.handleAwdDocUpload(event)">
+                <div id="awdUploadedDocName" style="font-size:0.85rem; color:var(--color-forest); font-weight:700; margin-top:4px; display:none;"></div>
+                <small style="color:#666;">Format: PDF, JPG, or PNG (Optional verification preview)</small>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:0.9rem; font-weight:700; color:var(--color-navy); display:flex; gap:8px; cursor:pointer;">
+                  <input type="checkbox" id="checkAwdConfirmation">
+                  <span>I confirm that the submitted disability/special needs information is accurate and true.</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+            <button class="btn btn-primary btn-lg" onclick="App.validateAndSavePetForm()">
+              Proceed to Booking Review ➔
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= STEP 5: BOOKING REVIEW & EDIT LOOP ================= -->
+      <div id="bookingStep5" class="booking-wizard-step">
+        <div class="step-header">
+          <div>
+            <h2>Step 5: Review Booking Details</h2>
+            <p style="color:var(--color-text-muted);">Please review your appointment summary before proceeding to payment.</p>
+          </div>
+        </div>
+
+        <div class="review-summary-card">
+          <!-- 1. Appointment Details -->
+          <div class="review-section">
+            <div class="review-header-row">
+              <h4>1. Appointment Details</h4>
+              <span class="edit-link" onclick="App.setupBookingStep(2)">Edit Schedule</span>
+            </div>
+            <div class="review-data-grid">
+              <div class="review-item">
+                <strong>Appointment Date</strong>
+                <span id="reviewAppointmentDate">-</span>
+              </div>
+              <div class="review-item">
+                <strong>Grooming Shift</strong>
+                <span id="reviewAppointmentShift">-</span>
+              </div>
+              <div class="review-item">
+                <strong>Location</strong>
+                <span>Fur & Bubbles, Davila St., Navotas City</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Pet Details -->
+          <div class="review-section">
+            <div class="review-header-row">
+              <h4>2. Pet Information</h4>
+              <span class="edit-link" onclick="App.setupBookingStep(4)">Edit Pet Details</span>
+            </div>
+            <div style="display:flex; gap:16px; align-items:center;">
+              <img id="reviewPetPhoto" style="width:70px; height:70px; border-radius:12px; object-fit:cover; border:1px solid #ddd;" alt="Pet">
+              <div class="review-data-grid" style="flex:1;">
+                <div class="review-item">
+                  <strong>Name & Species</strong>
+                  <span id="reviewPetName">-</span>
+                </div>
+                <div class="review-item">
+                  <strong>Breed</strong>
+                  <span id="reviewPetBreed">-</span>
+                </div>
+                <div class="review-item">
+                  <strong>Weight & Size Category</strong>
+                  <span id="reviewPetWeight">-</span>
+                </div>
+                <div class="review-item">
+                  <strong>Care Notes</strong>
+                  <span id="reviewPetNotes">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Selected Services & Inclusions -->
+          <div class="review-section">
+            <div class="review-header-row">
+              <h4>3. Services & Duration</h4>
+              <span class="edit-link" onclick="App.setupBookingStep(1)">Edit Services</span>
+            </div>
+            <table class="price-summary-table">
+              <tbody id="reviewServicesList">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+            <div style="font-size:0.9rem; color:var(--color-navy); font-weight:700; margin-top:6px;">
+              ⏱️ Total Estimated Duration: <span id="reviewEstimatedDuration">-</span>
+            </div>
+          </div>
+
+          <!-- 4. Payment Plan Breakdown -->
+          <div class="payment-plan-box">
+            <h4 style="color:var(--color-navy); margin-bottom:6px;">Payment Plan Summary</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:0.95rem;">
+              <div>
+                <strong>Required 20% Down Payment:</strong>
+                <div style="font-size:1.3rem; font-weight:800; color:var(--color-navy);" id="reviewDownPaymentAmount">₱0</div>
+                <small style="color:#555;">Secures the appointment slot via simulated QR</small>
+              </div>
+              <div>
+                <strong>Remaining 80% Cash Balance:</strong>
+                <div style="font-size:1.3rem; font-weight:800; color:var(--color-rose);" id="reviewRemainingBalanceAmount">₱0</div>
+                <small style="color:#555;">To be paid in cash at the counter before grooming</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn btn-outline" onclick="App.setupBookingStep(4)">← Back to Pet Form</button>
+          <button class="btn btn-primary btn-lg" onclick="App.submitBookingAndOpenPayment()">
+            Submit & Pay (Reserve Capacity) ➔
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= STEP 6: SUBMIT & PAY (15-MIN COUNTDOWN & QR) ================= -->
+      <div id="bookingStep6" class="booking-wizard-step">
+        <div class="step-header">
+          <div>
+            <h2>Step 6: Complete Simulated QR Payment</h2>
+            <p style="color:var(--color-text-muted);">Slot capacity temporarily reserved. Complete payment before countdown expires.</p>
+          </div>
+        </div>
+
+        <!-- 15-Minute Countdown Banner -->
+        <div class="countdown-box">
+          <div>
+            <strong>⏳ APPOINTMENT CAPACITY IS ON HOLD</strong>
+            <div style="font-size:0.85rem; opacity:0.9;">Please complete simulated payment before the timer reaches 00:00:</div>
+          </div>
+          <div class="countdown-digits" id="paymentTimerCountdownDisplay">15:00</div>
+        </div>
+
+        <div class="alert alert-simulation">
+          ⚠️ SIMULATION ONLY — NO REAL MONEY TRANSFERRED ⚠️
+        </div>
+
+        <!-- Payment Option Choice -->
+        <h4 style="margin-bottom:12px; color:var(--color-navy);">Choose Payment Option:</h4>
+        <div class="payment-options-grid">
+          <div class="payment-option-card selected" id="payCardDown" onclick="App.selectPaymentOption('down')">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4>20% Down Payment</h4>
+              <input type="radio" name="payOptionRadio" value="down" checked>
+            </div>
+            <div style="font-size:1.4rem; font-weight:800; color:var(--color-navy); margin:6px 0;" id="payOptionDownAmount">₱0</div>
+            <p style="font-size:0.82rem; color:#666;">
+              Pay 20% now to confirm slot. Remaining balance of <strong id="payOptionRemainingText">₱0</strong> is payable in cash at the shop.
+            </p>
+          </div>
+
+          <div class="payment-option-card" id="payCardFull" onclick="App.selectPaymentOption('full')">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4>100% Full Payment</h4>
+              <input type="radio" name="payOptionRadio" value="full">
+            </div>
+            <div style="font-size:1.4rem; font-weight:800; color:var(--color-navy); margin:6px 0;" id="payOptionFullAmount">₱0</div>
+            <p style="font-size:0.82rem; color:#666;">
+              Pay full amount through simulation now. Status will be marked <strong>Fully Paid</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Simulated QR Display Box -->
+        <div class="qr-display-container">
+          <div class="reference-display" id="payStepRefNumber">Ref #0000000145</div>
+          <div style="font-size:1.2rem; font-weight:800; color:var(--color-rose); margin-bottom:12px;">
+            Amount to Pay: <span id="payAmountDueDisplay">₱0</span>
+          </div>
+
+          <div class="simulated-qr-box" id="simulatedQrSvgContainer">
+            <!-- QR SVG generated by JS -->
+          </div>
+
+          <p style="font-size:0.85rem; color:#555; max-width:400px; margin:0 auto 18px;">
+            In actual testing or demonstration, pet owners scan this generated QR code. 
+            Click the button below to confirm the simulated transaction.
+          </p>
+
+          <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+            <button class="btn btn-rose btn-sm" onclick="App.cancelActiveHold()">Cancel Booking & Release Slot</button>
+            <button class="btn btn-primary btn-lg" onclick="App.confirmSimulatedPayment()">
+              ✓ Confirm Simulated Payment
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= STEP 7: BOOKING CONFIRMATION ================= -->
+      <div id="bookingStep7" class="booking-wizard-step">
+        <div class="confirmation-card">
+          <div class="confirmation-icon-circle">✓</div>
+          <h2 style="color:var(--color-forest); margin-bottom:6px;">Booking Confirmed!</h2>
+          <p style="color:var(--color-text-muted);">Your appointment has been successfully recorded.</p>
+
+          <div class="booking-ref-number" id="confirmRefNumber">0000000145</div>
+          <p style="font-size:0.85rem; color:#666; margin-bottom:20px;">
+            Please keep your Booking Reference Number handy upon arrival at the shop.
+          </p>
+
+          <table class="price-summary-table" style="text-align:left; margin-bottom:20px;">
+            <tr>
+              <td><strong>Appointment:</strong></td>
+              <td id="confirmDateShift" style="text-align:right;">-</td>
+            </tr>
+            <tr>
+              <td><strong>Pet:</strong></td>
+              <td id="confirmPetDetails" style="text-align:right;">-</td>
+            </tr>
+            <tr>
+              <td><strong>Services:</strong></td>
+              <td id="confirmServicesDetails" style="text-align:right;">-</td>
+            </tr>
+            <tr>
+              <td><strong>Total Amount:</strong></td>
+              <td id="confirmTotalAmount" style="text-align:right; font-weight:800;">-</td>
+            </tr>
+            <tr>
+              <td><strong>Payment Recorded:</strong></td>
+              <td id="confirmAmountPaid" style="text-align:right; color:var(--color-forest); font-weight:700;">-</td>
+            </tr>
+            <tr id="confirmRemainingBalanceRow" style="color:var(--color-inferno); font-weight:800;">
+              <td><strong>Remaining Balance:</strong></td>
+              <td id="confirmRemainingBalance" style="text-align:right;">-</td>
+            </tr>
+          </table>
+
+          <div class="alert alert-warning" style="text-align:left; margin-bottom:24px;">
+            <div>
+              <strong>Next Steps:</strong><br>
+              Please arrive at Fur & Bubbles along Davila St., Navotas City 10–15 minutes before your shift starts. 
+              Any remaining balance must be settled in cash at the counter before grooming begins.
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:center; gap:16px;">
+            <button class="btn btn-outline" onclick="App.routeTo('my-bookings-view')">
+              Done (View in My Bookings)
+            </button>
+            <button class="btn btn-primary" onclick="App.startNewBooking()">
+              + Add Another Booking (Another Pet)
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 4. MY BOOKINGS VIEW (Upcoming: On Hold & Confirmed) -->
+    <section id="my-bookings-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>My Bookings (Upcoming Appointments)</h2>
+          <p style="color:var(--color-text-muted);">Manage your active bookings, view remaining balance, reschedule, or cancel.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="App.startNewBooking()">+ New Booking</button>
+      </div>
+
+      <div id="myBookingsListContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 5. BOOKING HISTORY VIEW (Past & Cancelled) -->
+    <section id="booking-history-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>Booking History</h2>
+          <p style="color:var(--color-text-muted);">View records of past completed and cancelled grooming appointments.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label style="font-size:0.85rem; font-weight:700;">Sort By:</label>
+          <select id="historySortOrderSelect" class="form-select" style="width:auto; padding:6px 12px;" onchange="App.renderBookingHistory()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="bookingHistoryListContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 6. USER PROFILE & MY PETS VIEW -->
+    <section id="profile-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>Customer Account & Pet Management</h2>
+          <p style="color:var(--color-text-muted);">Update personal information and manage saved pet profiles.</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="App.handleLogout()">Log Out</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:28px;">
+        <!-- Manage Personal Info -->
+        <div style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:24px;">
+          <h3 style="color:var(--color-navy); margin-bottom:16px;">Personal Information</h3>
+          <form onsubmit="App.saveProfileChanges(event)">
+            <div class="form-group">
+              <label class="form-label" for="profileNameInput">Full Name</label>
+              <input type="text" id="profileNameInput" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profileEmailInput">Email Address (Read Only)</label>
+              <input type="email" id="profileEmailInput" class="form-input" disabled style="background:#eee;">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profilePhoneInput">Phone Number</label>
+              <input type="tel" id="profilePhoneInput" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profileBirthdateInput">Birthdate</label>
+              <input type="date" id="profileBirthdateInput" class="form-input">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Save Changes</button>
+          </form>
+        </div>
+
+        <!-- Saved Pets List -->
+        <div style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="color:var(--color-navy);">My Saved Pets</h3>
+            <button class="btn btn-accent btn-sm" onclick="App.openAddPetModal()">+ Add New Pet</button>
+          </div>
+          <div id="profilePetsListContainer">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. ABOUT US INFORMATIONAL VIEW -->
+    <section id="about-view" class="view-section">
+      <div class="hero-card" style="padding:30px; text-align:left; margin-bottom:24px;">
+        <h2 style="font-size:2rem; color:var(--color-navy); margin-bottom:10px;">About Fur & Bubbles Grooming Services</h2>
+        <p style="color:var(--color-text-muted); font-size:1.05rem; line-height:1.7;">
+          Fur & Bubbles Grooming Services is a privately owned pet care business located along <strong>Davila St., Navotas City, Philippines</strong>. 
+          Founded and operated by <strong>Paulene Serrano</strong>, it originated as a home-based grooming passion and has grown into a dedicated pet grooming facility serving pet owners across Navotas and nearby communities.
+        </p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+        <div style="background:#fff; padding:24px; border-radius:12px; border:1px solid #ddd;">
+          <h3 style="color:var(--color-navy); margin-bottom:10px;">🎯 Our Mission</h3>
+          <p style="color:#555;">
+            To help pet owners easily schedule grooming appointments by providing clear information about available services, appointment slots, and pricing while reducing waiting time and scheduling confusion.
+          </p>
+        </div>
+        <div style="background:#fff; padding:24px; border-radius:12px; border:1px solid #ddd;">
+          <h3 style="color:var(--color-navy); margin-bottom:10px;">🌟 Our Vision</h3>
+          <p style="color:#555;">
+            To be a trusted and convenient online destination where pet owners can easily book reliable, quality grooming services for their pets.
+          </p>
+        </div>
+      </div>
+
+      <div style="background:#fff; padding:24px; border-radius:12px; border:1px solid #ddd;">
+        <h3 style="color:var(--color-navy); margin-bottom:14px;">👥 The Grooming Team</h3>
+        <p style="color:#555; margin-bottom:12px;">
+          Our shop has 5 dedicated team members ensuring the highest level of pet welfare:
+        </p>
+        <ul style="margin-left:20px; line-height:1.8; color:#444;">
+          <li><strong>3 Professional Groomers:</strong> Jannel, Jenn, and Emman</li>
+          <li><strong>2 Assistant Specialists:</strong> Mike and Jess (assisting in bathing, drying, pet prep, and reception)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 8. CONTACT US VIEW -->
+    <section id="contact-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>Contact Us</h2>
+          <p style="color:var(--color-text-muted);">We would love to assist you and your furry companions!</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
+        <div style="background:#fff; padding:28px; border-radius:12px; border:1px solid #ddd;">
+          <h3 style="color:var(--color-navy); margin-bottom:16px;">Shop Location & Hours</h3>
+          <p style="margin-bottom:10px;"><strong>📍 Address:</strong> Along Davila St., Navotas City, Metro Manila, Philippines</p>
+          <p style="margin-bottom:10px;"><strong>🕒 Operating Shifts:</strong> 7:00 AM – 9:00 PM (Daily)</p>
+          <p style="margin-bottom:10px;"><strong>📞 Phone:</strong> +63 917 123 4567</p>
+          <p style="margin-bottom:16px;"><strong>✉️ Email:</strong> inquiries@furandbubbles.ph</p>
+          
+          <h4 style="color:var(--color-navy); margin-bottom:10px;">Official Social Media</h4>
+          <p style="font-size:0.9rem; color:#555;">
+            Facebook: <strong>fb.com/FurAndBubblesGrooming</strong><br>
+            Instagram: <strong>@furandbubblesnavotas</strong>
+          </p>
+        </div>
+
+        <div style="background:#fff; padding:28px; border-radius:12px; border:1px solid #ddd;">
+          <h3 style="color:var(--color-navy); margin-bottom:16px;">Send us an Inquiry</h3>
+          <form onsubmit="event.preventDefault(); alert('Inquiry received! We will respond shortly.'); this.reset();">
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input type="text" class="form-input" required placeholder="Juan Dela Cruz">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email or Phone</label>
+              <input type="text" class="form-input" required placeholder="juan@gmail.com / 0917...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message</label>
+              <textarea class="form-textarea" required placeholder="How can we help your pet?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Submit Inquiry</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. FAQS VIEW -->
+    <section id="faqs-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>Frequently Asked Questions (FAQs)</h2>
+          <p style="color:var(--color-text-muted);">Answers to common questions about booking, payments, and shifts.</p>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: How does the shift-based appointment system work?</h4>
+          <p style="color:#555;">
+            A: Each day offers three 4-hour grooming shifts: Shift 1 (7:00 AM – 11:00 AM), Shift 2 (12:00 NN – 4:00 PM), and Shift 3 (5:00 PM – 9:00 PM). Each shift has a fixed capacity of exactly 3 pets to ensure high-quality, stress-free care. Periods between 11:00 AM–12:00 NN and 4:00 PM–5:00 PM are dedicated breaks.
+          </p>
+        </div>
+
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: How does the 15-minute payment hold work?</h4>
+          <p style="color:#555;">
+            A: When you confirm your booking review and submit, your slot is placed On Hold for 15 minutes. If simulated payment (20% down or full) is completed, your booking becomes Confirmed. If the 15-minute countdown expires, the hold is automatically cancelled and the slot is made available to other customers.
+          </p>
+        </div>
+
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: What is the cancellation and refund policy?</h4>
+          <p style="color:#555;">
+            A: If you cancel at least 24 hours before your scheduled appointment shift start time, you receive a full simulated refund of amounts paid online. Cancellations made less than 24 hours prior are not eligible for a refund.
+          </p>
+        </div>
+
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: What is the Animals with Disability (AWD) Discount?</h4>
+          <p style="color:#555;">
+            A: Pet owners with pets experiencing physical disabilities, mobility difficulties, or special needs can declare their condition and optionally upload a supporting document to receive an automatic 20% demonstration discount on their booking total.
+          </p>
+        </div>
+
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd;">
+          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: Can I reschedule my appointment?</h4>
+          <p style="color:#555;">
+            A: Yes! You can reschedule upcoming appointments directly through My Bookings. The system checks capacity on the new shift before releasing the previous slot. Rescheduling retains your original reference number and payment without extra fees.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. TERMS & CONDITIONS VIEW -->
+    <section id="terms-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>Terms & Conditions</h2>
+          <p style="color:var(--color-text-muted);">Official booking, scheduling, and payment terms for Fur & Bubbles Grooming Services.</p>
+        </div>
+      </div>
+
+      <div style="background:#fff; padding:28px; border-radius:12px; border:1px solid #ddd; line-height:1.8; color:#444;">
+        <h4 style="color:var(--color-navy);">1. Booking & Shifts</h4>
+        <p>Customers choose a service, date, and grooming shift. Each shift accepts a maximum of three pets. The 11:00 AM–12:00 NN and 4:00 PM–5:00 PM periods are unavailable as breaks. Each pet’s estimated grooming duration must not exceed 240 minutes, and the actual duration may vary depending on the pet’s condition and behavior.</p>
+
+        <h4 style="color:var(--color-navy); margin-top:16px;">2. Accuracy of Information</h4>
+        <p>Customers are responsible for the accuracy of the weight, size category, and other pet information they submit. Actual prices and duration may differ if the pet’s actual condition differs. The system classifies pets into Small (≤10kg), Medium (10–25kg), Large (25–30kg), and Giant (>30kg).</p>
+
+        <h4 style="color:var(--color-navy); margin-top:16px;">3. Payment</h4>
+        <p>After submitting a booking, customers must complete a 20% down payment or full payment through the simulated QR payment within 15 minutes. Otherwise the booking is cancelled and the slot is released. The remaining 80% balance is paid in cash at the shop before grooming begins. All online payment features are simulations for demonstration purposes only.</p>
+
+        <h4 style="color:var(--color-navy); margin-top:16px;">4. Rescheduling and Cancellation</h4>
+        <p>Customers may reschedule or cancel through My Bookings. Cancelling at least 24 hours before the appointment start time receives a full simulated refund. Cancelling less than 24 hours before receives none.</p>
+
+        <h4 style="color:var(--color-navy); margin-top:16px;">5. Animals with Disability (AWD) Discount</h4>
+        <p>A 20% demonstration discount applies automatically after the customer declares the pet’s disability or special needs and confirms the information is accurate. It cannot be combined with another discount, follows the same 15-minute payment deadline, and is not independently verified by the system.</p>
+      </div>
+    </section>
+
+    <!-- 11. PRIVACY POLICY VIEW -->
+    <section id="privacy-view" class="view-section">
+      <div class="step-header">
+        <div>
+          <h2>Privacy Policy</h2>
+          <p style="color:var(--color-text-muted);">How customer and pet information is collected, stored, and protected.</p>
+        </div>
+      </div>
+
+      <div style="background:#fff; padding:28px; border-radius:12px; border:1px solid #ddd; line-height:1.8; color:#444;">
+        <h4 style="color:var(--color-navy);">1. Information Collected</h4>
+        <p>We collect customer account information including your name, email address, phone number, and birthdate. For grooming preparations, we collect pet details including pet name, species, breed, recorded weight, care notes, pet photos, and optional AWD disability declarations.</p>
+
+        <h4 style="color:var(--color-navy); margin-top:16px;">2. Use of Information</h4>
+        <p>Information is used exclusively to facilitate shift scheduling, calculate grooming durations and pricing, contact you regarding appointment updates, and prepare personalized grooming care.</p>
+
+        <h4 style="color:var(--color-navy); margin-top:16px;">3. Storage and Protection</h4>
+        <p>Customer passwords and authentication sessions are secured via industry-standard protocols. Pet photos and AWD supporting documents are stored separately and securely.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- RESCHEDULE MODAL -->
+  <div class="modal-overlay" id="rescheduleModal">
+    <div class="modal-content">
+      <button class="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <h3 id="rescheduleRefText">Reschedule Appointment</h3>
+        <p style="font-size:0.85rem; color:#666;">Current Slot: <span id="rescheduleCurrentDateShift" style="font-weight:700;">-</span></p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="rescheduleNewDateInput">Select New Date</label>
+        <input type="date" id="rescheduleNewDateInput" class="form-input" onchange="App.updateRescheduleShifts()">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="rescheduleShiftSelect">Select Available Grooming Shift</label>
+        <select id="rescheduleShiftSelect" class="form-select">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+      <div class="alert alert-info" style="font-size:0.85rem;">
+        The system reserves the new appointment capacity before releasing your current slot to prevent scheduling conflicts. Reference number and payments remain intact.
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn btn-outline btn-modal-cancel">Keep Current Slot</button>
+        <button class="btn btn-primary" onclick="App.confirmReschedule()">Confirm Reschedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANCEL MODAL -->
+  <div class="modal-overlay" id="cancelModal">
+    <div class="modal-content">
+      <button class="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <h3 style="color:var(--color-inferno);">Cancel Appointment</h3>
+        <p style="font-size:0.85rem; color:#666;" id="cancelModalRefText">Ref #</p>
+      </div>
+      <p style="margin-bottom:12px; font-size:0.95rem;">
+        Are you sure you want to cancel your appointment on <strong id="cancelModalAppointmentText">-</strong>?
+      </p>
+      <div id="cancelModalRefundNotice" style="margin-bottom:18px;">
+        <!-- Dynamically calculated 24h refund notice -->
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn btn-outline btn-modal-cancel">No, Keep Booking</button>
+        <button class="btn btn-rose" onclick="App.confirmCancellation()">Yes, Cancel Appointment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKING DETAILS RECORD MODAL -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-content">
+      <button class="modal-close-btn">&times;</button>
+      <div id="detailsModalContent">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD PET MODAL (PROFILE) -->
+  <div class="modal-overlay" id="addPetModal">
+    <div class="modal-content">
+      <button class="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <h3>Add New Pet Profile</h3>
+        <p style="font-size:0.85rem; color:#666;">Save pet details for faster booking.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalAddPetName">Pet Name *</label>
+        <input type="text" id="modalAddPetName" class="form-input" placeholder="e.g. Bella" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="modalAddPetSpecies">Species *</label>
+          <select id="modalAddPetSpecies" class="form-select">
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modalAddPetBreed">Breed *</label>
+          <input type="text" id="modalAddPetBreed" class="form-input" placeholder="e.g. Shih Tzu" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalAddPetWeight">Weight in kg *</label>
+        <input type="number" id="modalAddPetWeight" class="form-input" step="0.5" placeholder="e.g. 6.5" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalAddPetNotes">Care Notes</label>
+        <textarea id="modalAddPetNotes" class="form-textarea" placeholder="Skin sensitivities, allergies..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalAddPetPhoto">Pet Photo *</label>
+        <input type="file" id="modalAddPetPhoto" class="form-input" accept="image/png, image/jpeg" onchange="App.handleModalPetPhotoUpload(event)">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="App.saveNewPetFromModal()">Save Pet Profile</button>
+    </div>
+  </div>
+
+  <!-- SIMULATED OAUTH MODAL -->
+  <div class="modal-overlay" id="oauthModal">
+    <div class="modal-content" style="max-width:420px;">
+      <button class="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <h3 id="oauthModalTitle">Continue with Account</h3>
+        <p style="font-size:0.85rem; color:#666;">Simulated third-party authentication demonstration.</p>
+      </div>
+      <div id="oauthAccountList">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- GLOBAL FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="logo-text" style="margin-bottom:12px;">
+          <span class="logo-title" style="color:var(--color-butterscotch); font-size:1.6rem;">Fur & Bubbles</span>
+          <span class="logo-subtitle" style="color:#d1e3f0;">Grooming Services</span>
+        </div>
+        <p style="font-size:0.9rem; color:#c1d8ea; line-height:1.6;">
+          Your trusted pet grooming destination along Davila St., Navotas City. 
+          Dedicated to quality bathing, styling, and stress-free grooming shifts for dogs and cats.
+        </p>
+        <div class="footer-social-icons">
+          <a href="https://facebook.com" target="_blank" class="social-icon-btn" title="Facebook">📘</a>
+          <a href="https://instagram.com" target="_blank" class="social-icon-btn" title="Instagram">📸</a>
+          <a href="javascript:void(0)" class="social-icon-btn" title="Messenger">💬</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Discover</h4>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)" onclick="App.routeTo('services-view')">Services & Pricelist</a></li>
+          <li><a href="javascript:void(0)" onclick="App.routeTo('about-view')">About Our Shop</a></li>
+          <li><a href="javascript:void(0)" onclick="App.routeTo('faqs-view')">Grooming FAQs</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Appointments</h4>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)" onclick="App.startNewBooking()">Book Appointment</a></li>
+          <li><a href="javascript:void(0)" onclick="App.routeTo('my-bookings-view')">My Bookings</a></li>
+          <li><a href="javascript:void(0)" onclick="App.routeTo('booking-history-view')">Booking History</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Support & Legal</h4>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)" onclick="App.routeTo('contact-view')">Contact Us</a></li>
+          <li><a href="javascript:void(0)" onclick="App.routeTo('terms-view')">Terms & Conditions</a></li>
+          <li><a href="javascript:void(0)" onclick="App.routeTo('privacy-view')">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>&copy; 2026 Fur & Bubbles Grooming Services. All rights reserved.</div>
+      <div>Davila St., Navotas City, Philippines</div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
