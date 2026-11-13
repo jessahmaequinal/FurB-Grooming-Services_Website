@@ -1,0 +1,18 @@
+# OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Editor Directories
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node / Build artifacts (if any)
+node_modules/
+dist/
+build/
+*.log

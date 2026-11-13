@@ -358,6 +358,21 @@ const App = {
   holdTimerInterval: null,
   holdRemainingSeconds: 0,
 
+  // ROUTE TO PAGE MAP
+  pageMap: {
+    'home-view': 'index.html',
+    'services-view': 'services.html',
+    'booking-view': 'booking.html',
+    'my-bookings-view': 'booking.html?view=my-bookings-view',
+    'booking-history-view': 'booking.html?view=booking-history-view',
+    'profile-view': 'booking.html?view=profile-view',
+    'about-view': 'about.html',
+    'contact-view': 'contact.html',
+    'faqs-view': 'faqs.html',
+    'terms-view': 'faqs.html?view=terms-view',
+    'privacy-view': 'faqs.html?view=privacy-view'
+  },
+
   init: function() {
     initializeDefaultData();
     this.currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null');
@@ -366,7 +381,21 @@ const App = {
     this.checkPastBookings();
     this.renderServicesAndPricelist();
     this.initEventListeners();
-    this.routeTo('home-view');
+
+    // Determine target view from query, hash, data attribute, or first section
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewFromParam = urlParams.get('view');
+    const viewFromHash = window.location.hash ? window.location.hash.substring(1) : null;
+    const bodyDefault = document.body.dataset.defaultView;
+    const firstSection = document.querySelector('.view-section');
+
+    const targetView = viewFromParam || viewFromHash || bodyDefault || (firstSection ? firstSection.id : 'home-view');
+    
+    if (document.getElementById(targetView)) {
+      this.routeTo(targetView);
+    } else if (firstSection) {
+      this.routeTo(firstSection.id);
+    }
 
     // Run hold & past checker every 10 seconds
     setInterval(() => {
@@ -377,13 +406,18 @@ const App = {
 
   // ROUTING & NAVIGATION
   routeTo: function(viewId) {
+    const target = document.getElementById(viewId);
+    if (!target) {
+      // If the view exists on a different page, navigate to that page
+      const destination = this.pageMap[viewId] || 'index.html';
+      window.location.href = destination;
+      return;
+    }
+
     this.currentView = viewId;
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    const target = document.getElementById(viewId);
-    if (target) {
-      target.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Update active nav link
     document.querySelectorAll('.nav-link').forEach(link => {
