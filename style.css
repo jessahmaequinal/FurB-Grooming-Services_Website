@@ -98,59 +98,84 @@ a:hover {
    4. TOP BAR (Above Navigation)
    ===================================================================== */
 .top-bar {
-  background: linear-gradient(90deg, var(--color-navy-dark) 0%, var(--color-navy) 100%);
-  color: #e2edf5;
-  font-size: 0.82rem;
-  padding: 9px 20px;
+  background: #0d2638;
+  color: #cfdeea;
+  font-size: 0.78rem;
+  padding: 6px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  letter-spacing: 0.02em;
 }
 
 .top-bar-links {
   display: flex;
+  align-items: center;
   gap: 16px;
   list-style: none;
-  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
 }
 
 .top-bar-links a {
-  color: #f0f7fb;
-  font-weight: 600;
+  color: #d2e4f2;
+  font-weight: 500;
+  font-size: 0.78rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  padding: 2px 4px;
 }
 
 .top-bar-links a:hover {
   color: var(--color-butterscotch);
-  text-decoration: underline;
+  text-decoration: none;
+}
+
+.top-bar-links a:not(:last-child)::after {
+  content: '·';
+  margin-left: 14px;
+  color: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  font-weight: bold;
 }
 
 .top-bar-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
+  font-size: 0.78rem;
+  color: #b0cee3;
+}
+
+.top-bar-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* =====================================================================
    5. HEADER & MAIN NAVIGATION
    ===================================================================== */
 .main-header {
-  background-color: var(--color-white);
-  box-shadow: 0 2px 12px rgba(31, 101, 144, 0.1);
+  background-color: #ffffff;
+  box-shadow: 0 4px 20px rgba(13, 38, 56, 0.07);
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom: 2px solid var(--color-butterscotch);
+  border-bottom: 3px solid var(--color-butterscotch);
 }
 
 .navbar {
-  max-width: 1200px;
+  max-width: 1380px;
+  width: 100%;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 10px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  flex-wrap: nowrap !important;
+  gap: 16px;
 }
 
 .logo-container {
@@ -158,11 +183,13 @@ a:hover {
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
 }
 
 .logo-icon-svg {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   background: linear-gradient(135deg, var(--color-butterscotch), #f39c12);
   border-radius: var(--radius-md);
   display: flex;
@@ -172,92 +199,108 @@ a:hover {
 }
 
 .logo-icon-svg svg {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   fill: #fff;
 }
 
 .logo-text {
   display: flex;
   flex-direction: column;
+  line-height: 1.15;
 }
 
 .logo-title {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--color-navy);
-  letter-spacing: -0.5px;
-  line-height: 1.1;
+  letter-spacing: -0.4px;
+  margin: 0;
 }
 
 .logo-subtitle {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--color-rose);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
+  margin: 0;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
   list-style: none;
-  gap: 8px;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 1;
+  white-space: nowrap;
 }
 
-/* Nav link with animated underline sliding in from left */
 .nav-link {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--color-navy);
-  padding: 8px 14px;
-  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #1F6590;
+  padding: 7px 11px;
+  border-radius: 8px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   position: relative;
-  transition: var(--transition);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-decoration: none;
 }
 
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  left: 14px;
-  right: 14px;
-  height: 2px;
-  background-color: var(--color-butterscotch);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.25s ease-in-out;
-  border-radius: var(--radius-full);
+.nav-link:hover {
+  background-color: #edf5fa;
+  color: var(--color-navy-dark);
+  text-decoration: none;
 }
 
-.nav-link:hover::after,
-.nav-link.active::after {
-  transform: scaleX(1);
-}
-
-.nav-link:hover, .nav-link.active {
-  background-color: var(--color-navy-light);
-  color: var(--color-navy);
+.nav-link.active {
+  background-color: #e0eef7;
+  color: #154564;
+  font-weight: 700;
 }
 
 .nav-link .badge {
   background-color: var(--color-rose);
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: var(--radius-full);
+  line-height: 1.1;
+  box-shadow: 0 2px 4px rgba(230, 42, 52, 0.3);
 }
 
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.nav-actions .btn-primary {
+  background: linear-gradient(135deg, var(--color-forest) 0%, var(--color-forest-dark) 100%);
+  color: var(--color-white);
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: 50px;
+  box-shadow: 0 3px 10px rgba(49, 87, 44, 0.25);
+  white-space: nowrap;
+  border: none;
+}
+
+.nav-actions .btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-forest-dark) 0%, #1a2f17 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(49, 87, 44, 0.35);
 }
 
 /* =====================================================================
@@ -387,44 +430,55 @@ a:hover {
 }
 
 .account-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background-color: var(--color-navy-light);
+  gap: 10px;
+  background-color: #ffffff;
   color: var(--color-navy);
-  padding: 7px 14px;
-  border-radius: var(--radius-full);
-  border: 1px solid rgba(31, 101, 144, 0.2);
+  padding: 4px 14px 4px 5px;
+  border-radius: 50px;
+  border: 1.5px solid #d0e1ee;
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  box-shadow: 0 2px 6px rgba(13, 38, 56, 0.05);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.account-btn:hover {
+  border-color: var(--color-navy);
+  background-color: #f7fbfe;
+  box-shadow: 0 4px 12px rgba(31, 101, 144, 0.12);
 }
 
 .account-avatar-small {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: var(--color-butterscotch);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-butterscotch) 0%, #f39c12 100%);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
+  box-shadow: 0 2px 5px rgba(252, 179, 79, 0.4);
 }
 
 .account-dropdown {
   position: absolute;
-  top: 110%;
+  top: 115%;
   right: 0;
-  width: 230px;
+  width: 240px;
   background: #fff;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 30px rgba(13, 38, 56, 0.15);
   border: 1px solid var(--color-border);
   padding: 8px 0;
   display: none;
   z-index: 1050;
+  animation: modalPop 0.2s ease;
 }
 
 .account-dropdown.show {
@@ -434,6 +488,7 @@ a:hover {
 .account-dropdown-header {
   padding: 12px 16px;
   border-bottom: 1px solid var(--color-border);
+  background: #fbfdff;
 }
 
 .dropdown-user-name {
@@ -2096,7 +2151,80 @@ a:hover {
 /* =====================================================================
    34. RESPONSIVE BREAKPOINTS
    ===================================================================== */
-@media (max-width: 900px) {
+/* Compact widescreen / laptop (992px to 1280px) */
+@media (max-width: 1280px) {
+  .navbar {
+    padding: 8px 18px;
+    gap: 10px;
+  }
+  .nav-links {
+    gap: 2px;
+  }
+  .nav-link {
+    font-size: 0.84rem;
+    padding: 6px 9px;
+  }
+  .logo-title {
+    font-size: 1.22rem;
+  }
+  .logo-subtitle {
+    font-size: 0.65rem;
+  }
+  .account-btn {
+    padding: 3px 10px 3px 4px;
+    font-size: 0.82rem;
+  }
+  .nav-actions .btn-primary {
+    padding: 7px 14px;
+    font-size: 0.82rem;
+  }
+}
+
+/* Tablet & Mobile (< 992px) */
+@media (max-width: 991px) {
+  .top-bar-links {
+    display: none;
+  }
+  .top-bar {
+    justify-content: center;
+    padding: 6px 14px;
+  }
+  .top-bar-info {
+    font-size: 0.76rem;
+    gap: 14px;
+  }
+  .navbar {
+    flex-wrap: wrap !important;
+    padding: 10px 16px;
+    gap: 12px;
+  }
+  .logo-container {
+    order: 1;
+  }
+  .nav-actions {
+    order: 2;
+    margin-left: auto;
+  }
+  .nav-links {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding: 6px 2px 8px;
+    justify-content: flex-start;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-link {
+    flex-shrink: 0;
+    font-size: 0.84rem;
+    padding: 6px 12px;
+    background: #edf5fa;
+    border-radius: 50px;
+  }
+  .nav-link.active {
+    background: var(--color-navy);
+    color: #ffffff;
+  }
   .schedule-container   { grid-template-columns: 1fr; }
   .booking-card-body    { grid-template-columns: 1fr; text-align: left; }
   .footer-container     { grid-template-columns: 1fr 1fr; }
@@ -2104,30 +2232,13 @@ a:hover {
   .step-label           { display: none; }
 }
 
-@media (max-width: 768px) {
-  /* Hide top-bar links on mobile */
-  .top-bar-links {
-    display: none;
-  }
-  .top-bar {
-    justify-content: center;
-  }
-}
-
 @media (max-width: 640px) {
-  .top-bar { flex-direction: column; gap: 6px; text-align: center; }
-
-  /* Mobile nav */
-  .navbar         { flex-wrap: wrap; }
-  .nav-links      { order: 3; width: 100%; justify-content: space-around; margin-top: 10px; }
-  .nav-link       { font-size: 0.82rem; padding: 6px 10px; }
-
+  .top-bar { flex-direction: column; gap: 4px; text-align: center; }
   .footer-container       { grid-template-columns: 1fr; }
   .form-row               { grid-template-columns: 1fr; }
   .pet-weight-grid        { grid-template-columns: 1fr; }
   .payment-options-grid   { grid-template-columns: 1fr; }
-
-  .hero-welcome-title { font-size: 2.2rem; }
-  .hero-greeting      { font-size: 1.3rem; }
-  .hero-card          { padding: 40px 20px; }
+  .hero-welcome-title     { font-size: 2.2rem; }
+  .hero-greeting          { font-size: 1.3rem; }
+  .hero-card              { padding: 40px 20px; }
 }
