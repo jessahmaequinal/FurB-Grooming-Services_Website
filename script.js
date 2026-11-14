@@ -366,6 +366,7 @@ const App = {
     'my-bookings-view': 'booking.html?view=my-bookings-view',
     'booking-history-view': 'booking.html?view=booking-history-view',
     'profile-view': 'booking.html?view=profile-view',
+    'pets-view': 'booking.html?view=pets-view',
     'about-view': 'about.html',
     'contact-view': 'contact.html',
     'faqs-view': 'faqs.html',
@@ -439,6 +440,8 @@ const App = {
       this.renderBookingHistory();
     } else if (viewId === 'profile-view') {
       this.renderProfileView();
+    } else if (viewId === 'pets-view') {
+      this.renderPetsView();
     } else if (viewId === 'services-view') {
       this.renderServicesAndPricelist();
     }
@@ -808,9 +811,32 @@ const App = {
     container.innerHTML = html;
   },
 
+  switchServiceTab: function(type) {
+    this.bookingDraft.bookingType = type;
+    if (type === 'package') {
+      if (!this.bookingDraft.packageId) {
+        this.bookingDraft.packageId = 'basic_grooming';
+      }
+    } else if (type === 'alaCarte') {
+      if (!this.bookingDraft.selectedAlaCarte || this.bookingDraft.selectedAlaCarte.length === 0) {
+        this.bookingDraft.selectedAlaCarte = ['bath_blowdry'];
+      }
+    }
+    this.renderServiceSelectionStep();
+  },
+
   selectPackage: function(pkgId) {
     this.bookingDraft.bookingType = 'package';
     this.bookingDraft.packageId = pkgId;
+    const pkgTab = document.getElementById('tabBookingPackage');
+    const alaTab = document.getElementById('tabBookingAlaCarte');
+    const pkgContainer = document.getElementById('packageSelectionContainer');
+    const alaContainer = document.getElementById('alaCarteSelectionContainer');
+    if (pkgTab) pkgTab.classList.add('active');
+    if (alaTab) alaTab.classList.remove('active');
+    if (pkgContainer) pkgContainer.style.display = 'block';
+    if (alaContainer) alaContainer.style.display = 'none';
+
     this.renderPackageCards();
     this.renderAddonCheckboxes();
     this.updateLiveRunningSummary();
@@ -846,6 +872,15 @@ const App = {
 
   toggleAlaCarte: function(srvId) {
     this.bookingDraft.bookingType = 'alaCarte';
+    const pkgTab = document.getElementById('tabBookingPackage');
+    const alaTab = document.getElementById('tabBookingAlaCarte');
+    const pkgContainer = document.getElementById('packageSelectionContainer');
+    const alaContainer = document.getElementById('alaCarteSelectionContainer');
+    if (pkgTab) pkgTab.classList.remove('active');
+    if (alaTab) alaTab.classList.add('active');
+    if (pkgContainer) pkgContainer.style.display = 'none';
+    if (alaContainer) alaContainer.style.display = 'block';
+
     let list = this.bookingDraft.selectedAlaCarte || [];
     if (list.includes(srvId)) {
       list = list.filter(id => id !== srvId);
@@ -2355,11 +2390,22 @@ const App = {
       return;
     }
 
-    document.getElementById('profileNameInput').value = this.currentUser.name;
-    document.getElementById('profileEmailInput').value = this.currentUser.email;
-    document.getElementById('profilePhoneInput').value = this.currentUser.phone || '';
-    document.getElementById('profileBirthdateInput').value = this.currentUser.birthdate || '';
+    const nameEl = document.getElementById('profileNameInput');
+    const emailEl = document.getElementById('profileEmailInput');
+    const phoneEl = document.getElementById('profilePhoneInput');
+    const bdayEl = document.getElementById('profileBirthdateInput');
 
+    if (nameEl) nameEl.value = this.currentUser.name || '';
+    if (emailEl) emailEl.value = this.currentUser.email || '';
+    if (phoneEl) phoneEl.value = this.currentUser.phone || '';
+    if (bdayEl) bdayEl.value = this.currentUser.birthdate || '';
+  },
+
+  renderPetsView: function() {
+    if (!this.currentUser) {
+      this.routeTo('booking-view');
+      return;
+    }
     this.renderProfilePetsList();
   },
 
