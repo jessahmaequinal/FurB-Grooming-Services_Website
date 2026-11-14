@@ -105,29 +105,65 @@
 
     <!-- SERVICES & PRICELIST VIEW (Tables 3, 4, 5, 6) -->
     <section id="services-view" class="view-section active">
-      <div class="step-header">
-        <div>
-          <h2>Services &amp; Pricelist</h2>
-          <p style="color:var(--color-text-muted);">Transparent grooming prices based on weight category. Dogs and Cats only.</p>
+      <div class="page-hero-banner mb-4 p-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-dark) 100%);">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2">📋 Transparent Salon Pricelist</span>
+            <h2 class="display-6 fw-bold text-white mb-1">Services &amp; Packages</h2>
+            <p class="text-white-50 mb-0">Clear, size-based pricing for dogs and cats with zero hidden fees.</p>
+          </div>
+          <a class="btn btn-accent btn-lg px-4" href="booking.html">📅 Book Appointment</a>
         </div>
-        <a class="btn btn-primary" href="booking.html">Book an Appointment</a>
       </div>
 
       <!-- Size Category Reference (Table 6) -->
-      <div class="pet-weight-calculator-box" style="margin-bottom:28px;">
-        <h4 style="margin-bottom:8px; color:var(--color-navy);">Pet Size Categories &amp; Weight Ranges (Table 6)</h4>
-        <div style="display:flex; gap:12px; flex-wrap:wrap;">
-          <span class="size-category-badge badge-small">Small: 10 kg and below</span>
-          <span class="size-category-badge badge-medium">Medium: Above 10 kg up to 25 kg</span>
-          <span class="size-category-badge badge-large">Large: Above 25 kg up to 30 kg</span>
-          <span class="size-category-badge badge-giant">Giant: Above 30 kg (No upper limit)</span>
+      <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #fffcf5, #ffffff); border-left: 5px solid var(--color-butterscotch) !important;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="fs-4">⚖️</span>
+            <h4 class="mb-0 fw-bold text-navy" style="color:var(--color-navy);">Pet Size Categories &amp; Weight Ranges (Table 6)</h4>
+          </div>
+          <p class="text-muted small mb-3">Prices and durations automatically adapt based on your pet's recorded or estimated weight:</p>
+          <div class="row g-3">
+            <div class="col-sm-6 col-lg-3">
+              <div class="p-3 rounded-3 h-100 text-center" style="background:#e3f2fd; border:1px solid #bbdefb;">
+                <div class="fs-2 mb-1">🐕</div>
+                <div class="fw-bold text-primary">Small</div>
+                <div class="small text-muted fw-bold">10 kg and below</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="p-3 rounded-3 h-100 text-center" style="background:#e8f5e9; border:1px solid #c8e6c9;">
+                <div class="fs-2 mb-1">🐩</div>
+                <div class="fw-bold text-success">Medium</div>
+                <div class="small text-muted fw-bold">Above 10 kg up to 25 kg</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="p-3 rounded-3 h-100 text-center" style="background:#fff3e0; border:1px solid #ffe0b2;">
+                <div class="fs-2 mb-1">🦮</div>
+                <div class="fw-bold" style="color:#e65100;">Large</div>
+                <div class="small text-muted fw-bold">Above 25 kg up to 30 kg</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="p-3 rounded-3 h-100 text-center" style="background:#fce4ec; border:1px solid #f8bbd0;">
+                <div class="fs-2 mb-1">🐘</div>
+                <div class="fw-bold text-danger">Giant</div>
+                <div class="small text-muted fw-bold">Above 30 kg (No limit)</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Table 5: Grooming Packages -->
-      <h3 style="margin-bottom:12px; color:var(--color-navy);">1. Grooming Packages (Inclusions &amp; Pricing)</h3>
-      <div style="overflow-x:auto;">
-        <table class="custom-table">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge rounded-pill px-3 py-2" style="background:var(--color-butterscotch); color:#332002; font-weight:800;">Section 1</span>
+        <h3 class="mb-0 fw-bold" style="color:var(--color-navy);">Full Grooming Packages</h3>
+      </div>
+      <div class="table-responsive shadow-sm rounded-4 mb-4">
+        <table class="custom-table mb-0">
           <thead>
             <tr>
               <th>Package</th>
@@ -145,9 +181,12 @@
       </div>
 
       <!-- Table 3: À La Carte Services -->
-      <h3 style="margin:28px 0 12px; color:var(--color-navy);">2. À La Carte Individual Services</h3>
-      <div style="overflow-x:auto;">
-        <table class="custom-table">
+      <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+        <span class="badge rounded-pill px-3 py-2" style="background:var(--color-navy); color:#fff; font-weight:800;">Section 2</span>
+        <h3 class="mb-0 fw-bold" style="color:var(--color-navy);">À La Carte Individual Services</h3>
+      </div>
+      <div class="table-responsive shadow-sm rounded-4 mb-4">
+        <table class="custom-table mb-0">
           <thead>
             <tr>
               <th>Service</th>
@@ -164,9 +203,12 @@
       </div>
 
       <!-- Table 4: Add-on Services -->
-      <h3 style="margin:28px 0 12px; color:var(--color-navy);">3. Add-on Services (Optional Enhancements)</h3>
-      <div style="overflow-x:auto;">
-        <table class="custom-table">
+      <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+        <span class="badge rounded-pill px-3 py-2" style="background:var(--color-forest); color:#fff; font-weight:800;">Section 3</span>
+        <h3 class="mb-0 fw-bold" style="color:var(--color-navy);">Add-on Services (Optional Enhancements)</h3>
+      </div>
+      <div class="table-responsive shadow-sm rounded-4 mb-4">
+        <table class="custom-table mb-0">
           <thead>
             <tr>
               <th>Add-on Service &amp; Notes</th>
@@ -182,12 +224,18 @@
         </table>
       </div>
 
-      <div class="alert alert-warning" style="margin-top:24px;">
-        <div>
-          <strong>Pricing Rules &amp; Notes:</strong><br>
-          • Customers select either <strong>one grooming package</strong> OR <strong>one or more à la carte services</strong>, not both.<br>
-          • <strong>Organic Shampoo Upgrade</strong> is already included in <em>Spa Grooming</em> and will not be charged or counted again.<br>
-          • <strong>Animals with Disability (AWD):</strong> Eligible for an automatic 20% demonstration discount upon declaring special needs during booking.
+      <div class="alert alert-warning shadow-sm rounded-4 mt-4 p-4 border-0" style="background:#fff9e6; border-left:6px solid var(--color-butterscotch) !important;">
+        <div class="d-flex gap-3">
+          <div class="fs-2">💡</div>
+          <div>
+            <h5 class="fw-bold mb-2" style="color:#7d5203;">Pricing Rules &amp; Booking Guidelines</h5>
+            <ul class="mb-0 ps-3" style="color:#6d4800; line-height:1.7;">
+              <li>Customers select either <strong>one grooming package</strong> OR <strong>one or more à la carte services</strong> (not both in a single session).</li>
+              <li><strong>Organic Shampoo Upgrade</strong> is already included in <em>Spa Grooming</em> and will not be charged or counted again.</li>
+              <li><strong>Animals with Disability (AWD):</strong> Entitled to an automatic <strong>20% discount</strong> when special needs are declared during booking.</li>
+              <li>Maximum grooming duration is <strong>240 minutes per pet</strong> across all shifts.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>

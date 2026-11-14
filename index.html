@@ -104,88 +104,194 @@
   <main class="main-content">
 
     <!-- 1. HOME VIEW -->
-    <section id="home-view" class="view-section active">
-      <div class="hero-card">
-        <!-- Retro TV Mascot -->
-        <div class="hero-tv-mascot">
-          <div class="hero-tv-antenna"></div>
-          <div class="hero-tv-screen">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="14" r="5" />
-              <circle cx="8" cy="9" r="2" />
-              <circle cx="16" cy="9" r="2" />
-              <circle cx="5" cy="13" r="1.5" />
-              <circle cx="19" cy="13" r="1.5" />
-            </svg>
-          </div>
-          <div class="hero-tv-dials">
-            <div class="dial"></div>
-            <div class="dial"></div>
-          </div>
-        </div>
+    <section id="home-view" class="view-section active hero-section">
 
-        <h1 class="hero-welcome-title">WELCOME!</h1>
-        <div class="hero-greeting" id="homeGreetingText">PAMPER YOUR PET WITH EXPERT CARE</div>
-        <p class="hero-description">
-          Welcome to Fur &amp; Bubbles Grooming Services in Davila St., Navotas City. 
-          Experience our transparent shift-based booking system with real-time slot availability, 
-          guaranteeing a stress-free grooming session for your beloved dogs and cats.
-        </p>
-        <a class="btn btn-primary btn-lg" href="booking.html" style="font-size:1.2rem; padding:14px 36px; text-decoration:none; display:inline-block;">
-          🐾 BOOK NOW!
-        </a>
-      </div>
+      <!-- HERO: Full-bleed two-column layout -->
+      <div class="container-fluid px-0">
+        <div class="row g-0 align-items-center" style="min-height: 480px; background: linear-gradient(135deg, #1F6590 0%, #154564 60%, #0d2e44 100%); padding: 60px 5% 60px;">
 
-      <!-- 4 Core Functional Hub Cards -->
-      <div class="section-grid">
-        <a class="hub-card" href="services.html" style="text-decoration:none; color:inherit;">
-          <div>
-            <div class="hub-icon blue">📋</div>
-            <h3>Discover</h3>
-            <p>Explore our transparent grooming packages, à la carte services, and add-on pricelist based on your pet's size.</p>
+          <!-- LEFT: TV Mascot -->
+          <div class="col-md-5 d-flex justify-content-center align-items-center mb-4 mb-md-0">
+            <div class="hero-tv-mascot" style="transform: scale(1.15);">
+              <div class="hero-tv-antenna"></div>
+              <div class="hero-tv-screen">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="14" r="5" />
+                  <circle cx="8" cy="9" r="2" />
+                  <circle cx="16" cy="9" r="2" />
+                  <circle cx="5" cy="13" r="1.5" />
+                  <circle cx="19" cy="13" r="1.5" />
+                </svg>
+              </div>
+              <div class="hero-tv-dials">
+                <div class="dial"></div>
+                <div class="dial"></div>
+              </div>
+            </div>
           </div>
-          <button class="btn btn-outline btn-sm">View Pricelist</button>
-        </a>
 
-        <a class="hub-card" href="booking.html" style="text-decoration:none; color:inherit;">
-          <div>
-            <div class="hub-icon yellow">📅</div>
-            <h3>Book a Service</h3>
-            <p>Reserve one of 3 daily shifts (max 3 pets per shift) with real-time availability and simulated payment.</p>
+          <!-- RIGHT: Text & CTA -->
+          <div class="col-md-7 text-md-start text-center px-4 px-md-5">
+            <!-- Decorative Badge -->
+            <div class="mb-3">
+              <span style="display:inline-block; background: rgba(252,179,79,0.18); border: 1.5px solid #FCB34F; color: #FCB34F; border-radius: 50px; padding: 6px 20px; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.03em;">
+                🐾 Navotas City's Premier Pet Salon
+              </span>
+            </div>
+
+            <h1 class="hero-welcome-title" style="color:#fff; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height:1.1; margin-bottom: 10px;">WELCOME!</h1>
+            <div class="hero-greeting" id="homeGreetingText" style="color:#FCB34F; font-size: clamp(1rem, 2.5vw, 1.4rem); font-weight:700; letter-spacing:0.06em; margin-bottom: 16px;">PAMPER YOUR PET WITH EXPERT CARE</div>
+            <p class="hero-description" style="color: #c9e0f0; font-size: 1rem; line-height:1.7; max-width: 480px; margin: 0 auto 28px; margin-md-left: 0;">
+              Welcome to Fur &amp; Bubbles Grooming Services in Davila St., Navotas City. 
+              Experience our transparent shift-based booking system with real-time slot availability, 
+              guaranteeing a stress-free grooming session for your beloved dogs and cats.
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="d-flex flex-wrap gap-3 justify-content-md-start justify-content-center align-items-center">
+              <a class="btn btn-accent btn-lg" href="booking.html" style="font-size:1.1rem; padding:13px 34px; text-decoration:none; display:inline-block; background:#FCB34F; color:#1a1a1a; border:none; font-weight:700; border-radius:50px; box-shadow: 0 4px 18px rgba(252,179,79,0.4);">
+                🐾 BOOK NOW!
+              </a>
+              <a href="services.html" style="color: #FCB34F; font-weight: 600; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: gap 0.2s ease;">
+                View Services →
+              </a>
+            </div>
           </div>
-          <button class="btn btn-accent btn-sm">Book Appointment</button>
-        </a>
 
-        <a class="hub-card" href="booking.html?view=my-bookings-view" style="text-decoration:none; color:inherit;">
-          <div>
-            <div class="hub-icon green">🗓️</div>
-            <h3>Manage</h3>
-            <p>View upcoming appointments, reschedule date/shift without extra fees, or cancel with 24h refund guarantee.</p>
-          </div>
-          <button class="btn btn-primary btn-sm">My Bookings</button>
-        </a>
-
-        <a class="hub-card" href="booking.html?view=profile-view" style="text-decoration:none; color:inherit;">
-          <div>
-            <div class="hub-icon red">👤</div>
-            <h3>Account</h3>
-            <p>Manage your pet profiles, care notes, uploaded photos, and account credentials all in one organized place.</p>
-          </div>
-          <button class="btn btn-navy btn-sm">Manage Profile</button>
-        </a>
-      </div>
-
-      <!-- Daily Shifts & Capacity Transparency Banner -->
-      <div class="alert alert-info" style="align-items:center;">
-        <div style="font-size:2rem;">⏰</div>
-        <div>
-          <strong>Daily Shift Capacity Management (3 Pets Maximum Per Shift):</strong><br>
-          Shift 1: <strong>7:00 AM – 11:00 AM</strong> | Break: 11:00 AM – 12:00 NN | 
-          Shift 2: <strong>12:00 NN – 4:00 PM</strong> | Break: 4:00 PM – 5:00 PM | 
-          Shift 3: <strong>5:00 PM – 9:00 PM</strong>.<br>
-          <em>Handled by our 3 skilled groomers (Jannel, Jenn, and Emman) and 2 assistants (Mike and Jess).</em>
         </div>
       </div>
+
+      <!-- STATS STRIP: Between hero and hub cards -->
+      <div class="container-fluid" style="background: #fff; border-bottom: 1px solid #e8edf2; padding: 18px 5%;">
+        <div class="d-flex justify-content-center gap-4 flex-wrap align-items-center">
+          <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:#1F6590; font-size:0.95rem;">
+            <span style="font-size:1.3rem;">🐾</span> 3 Daily Shifts
+          </div>
+          <div style="width:1px; height:28px; background:#dee2e6;" class="d-none d-sm-block"></div>
+          <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:#1F6590; font-size:0.95rem;">
+            <span style="font-size:1.3rem;">✂️</span> 5 Expert Groomers
+          </div>
+          <div style="width:1px; height:28px; background:#dee2e6;" class="d-none d-sm-block"></div>
+          <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:#1F6590; font-size:0.95rem;">
+            <span style="font-size:1.3rem;">⏱️</span> 15-Min Hold
+          </div>
+          <div style="width:1px; height:28px; background:#dee2e6;" class="d-none d-sm-block"></div>
+          <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:#1F6590; font-size:0.95rem;">
+            <span style="font-size:1.3rem;">🐕</span> Dogs &amp; Cats
+          </div>
+        </div>
+      </div>
+
+      <!-- HUB CARDS SECTION -->
+      <div class="container" style="padding: 48px 20px 36px;">
+        <h2 class="section-title text-center mb-4" style="font-size:1.6rem; color:#154564; font-weight:700;">What Would You Like To Do?</h2>
+
+        <!-- 4 Core Functional Hub Cards -->
+        <div class="section-grid">
+
+          <a class="hub-card card" href="services.html" style="text-decoration:none; color:inherit; border-top: 4px solid #1F6590; border-radius: 12px; overflow:hidden;">
+            <div class="card-body d-flex flex-column" style="height:100%;">
+              <div>
+                <div class="hub-icon blue">📋</div>
+                <h3>Discover</h3>
+                <p>Explore our transparent grooming packages, à la carte services, and add-on pricelist based on your pet's size.</p>
+              </div>
+              <button class="btn btn-outline btn-sm mt-auto">View Pricelist</button>
+            </div>
+          </a>
+
+          <a class="hub-card card" href="booking.html" style="text-decoration:none; color:inherit; border-top: 4px solid #FCB34F; border-radius: 12px; overflow:hidden;">
+            <div class="card-body d-flex flex-column" style="height:100%;">
+              <div>
+                <div class="hub-icon yellow">📅</div>
+                <h3>Book a Service</h3>
+                <p>Reserve one of 3 daily shifts (max 3 pets per shift) with real-time availability and simulated payment.</p>
+              </div>
+              <button class="btn btn-accent btn-sm mt-auto">Book Appointment</button>
+            </div>
+          </a>
+
+          <a class="hub-card card" href="booking.html?view=my-bookings-view" style="text-decoration:none; color:inherit; border-top: 4px solid #31572C; border-radius: 12px; overflow:hidden;">
+            <div class="card-body d-flex flex-column" style="height:100%;">
+              <div>
+                <div class="hub-icon green">🗓️</div>
+                <h3>Manage</h3>
+                <p>View upcoming appointments, reschedule date/shift without extra fees, or cancel with 24h refund guarantee.</p>
+              </div>
+              <button class="btn btn-primary btn-sm mt-auto">My Bookings</button>
+            </div>
+          </a>
+
+          <a class="hub-card card" href="booking.html?view=profile-view" style="text-decoration:none; color:inherit; border-top: 4px solid #E62A34; border-radius: 12px; overflow:hidden;">
+            <div class="card-body d-flex flex-column" style="height:100%;">
+              <div>
+                <div class="hub-icon red">👤</div>
+                <h3>Account</h3>
+                <p>Manage your pet profiles, care notes, uploaded photos, and account credentials all in one organized place.</p>
+              </div>
+              <button class="btn btn-navy btn-sm mt-auto">Manage Profile</button>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- SHIFT INFO: 3 clean cards side-by-side -->
+      <div style="background: #eaf3f8; padding: 32px 5% 40px; border-top: 1px solid #d0e6f2;">
+        <div class="container">
+          <div class="text-center mb-3">
+            <span style="font-size: 1.5rem;">⏰</span>
+            <h5 class="d-inline ms-2 align-middle" style="color:#154564; font-weight:700;">Daily Shift Capacity Management</h5>
+            <div style="font-size:0.88rem; color:#4a7a99; margin-top:4px;">(3 Pets Maximum Per Shift)</div>
+          </div>
+
+          <!-- Alert wrapper preserved for JS hooks -->
+          <div class="alert alert-info d-none" style="display:none!important;" aria-hidden="true">
+            <div style="font-size:2rem;">⏰</div>
+            <div>
+              <strong>Daily Shift Capacity Management (3 Pets Maximum Per Shift):</strong><br>
+              Shift 1: <strong>7:00 AM – 11:00 AM</strong> | Break: 11:00 AM – 12:00 NN | 
+              Shift 2: <strong>12:00 NN – 4:00 PM</strong> | Break: 4:00 PM – 5:00 PM | 
+              Shift 3: <strong>5:00 PM – 9:00 PM</strong>.<br>
+              <em>Handled by our 3 skilled groomers (Jannel, Jenn, and Emman) and 2 assistants (Mike and Jess).</em>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 flex-wrap justify-content-center">
+
+            <!-- Shift 1 Card -->
+            <div style="flex: 1; min-width: 200px; max-width: 320px; background:#fff; border-radius:12px; padding: 20px 22px; box-shadow: 0 2px 10px rgba(31,101,144,0.10); border-left: 4px solid #1F6590;">
+              <div style="font-weight:800; color:#1F6590; font-size:1rem; margin-bottom:6px;">🌅 Shift 1 — Morning</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#154564;">7:00 AM – 11:00 AM</div>
+              <div style="font-size:0.82rem; color:#789aab; margin-top:4px;">Break: 11:00 AM – 12:00 NN</div>
+              <div style="margin-top:10px; font-size:0.85rem; color:#4a6a7a;">Max 3 pets per shift</div>
+            </div>
+
+            <!-- Shift 2 Card -->
+            <div style="flex: 1; min-width: 200px; max-width: 320px; background:#fff; border-radius:12px; padding: 20px 22px; box-shadow: 0 2px 10px rgba(252,179,79,0.12); border-left: 4px solid #FCB34F;">
+              <div style="font-weight:800; color:#c77f00; font-size:1rem; margin-bottom:6px;">☀️ Shift 2 — Afternoon</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#154564;">12:00 NN – 4:00 PM</div>
+              <div style="font-size:0.82rem; color:#789aab; margin-top:4px;">Break: 4:00 PM – 5:00 PM</div>
+              <div style="margin-top:10px; font-size:0.85rem; color:#4a6a7a;">Max 3 pets per shift</div>
+            </div>
+
+            <!-- Shift 3 Card -->
+            <div style="flex: 1; min-width: 200px; max-width: 320px; background:#fff; border-radius:12px; padding: 20px 22px; box-shadow: 0 2px 10px rgba(49,87,44,0.10); border-left: 4px solid #31572C;">
+              <div style="font-weight:800; color:#31572C; font-size:1rem; margin-bottom:6px;">🌙 Shift 3 — Evening</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#154564;">5:00 PM – 9:00 PM</div>
+              <div style="font-size:0.82rem; color:#789aab; margin-top:4px;">&nbsp;</div>
+              <div style="margin-top:10px; font-size:0.85rem; color:#4a6a7a;">Max 3 pets per shift</div>
+            </div>
+
+          </div>
+
+          <!-- Team note -->
+          <div class="text-center mt-3" style="font-size:0.88rem; color:#5a8a99; font-style:italic;">
+            Handled by our 3 skilled groomers (Jannel, Jenn, and Emman) and 2 assistants (Mike and Jess).
+          </div>
+        </div>
+      </div>
+
     </section>
 
   </main>

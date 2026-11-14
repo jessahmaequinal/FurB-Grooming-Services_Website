@@ -104,97 +104,106 @@
   <main class="main-content">
 
     <!-- SUB-NAV SWITCHER -->
-    <div style="display:flex; gap:12px; margin-bottom:24px; border-bottom:1px solid #ddd; padding-bottom:12px;">
-      <button class="btn btn-sm btn-primary" onclick="App.routeTo('faqs-view')">Frequently Asked Questions</button>
-      <button class="btn btn-sm btn-outline" onclick="App.routeTo('terms-view')">Terms &amp; Conditions</button>
-      <button class="btn btn-sm btn-outline" onclick="App.routeTo('privacy-view')">Privacy Policy</button>
+    <div class="d-flex flex-wrap gap-2 mb-4 p-2 bg-white rounded-pill shadow-sm border" style="max-width: 620px;">
+      <button class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-bold" onclick="App.routeTo('faqs-view')">❓ Frequently Asked Questions</button>
+      <button class="btn btn-sm btn-outline rounded-pill px-3 py-2 fw-bold" onclick="App.routeTo('terms-view')">📜 Terms &amp; Conditions</button>
+      <button class="btn btn-sm btn-outline rounded-pill px-3 py-2 fw-bold" onclick="App.routeTo('privacy-view')">🔒 Privacy Policy</button>
     </div>
 
     <!-- 1. FAQS VIEW -->
     <section id="faqs-view" class="view-section active">
-      <div class="step-header">
-        <div>
-          <h2>Frequently Asked Questions (FAQs)</h2>
-          <p style="color:var(--color-text-muted);">Answers to common questions about booking, payments, and shifts.</p>
+      <div class="page-hero-banner mb-4 p-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-dark) 100%);">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2">💡 Help &amp; Support</span>
+            <h2 class="display-6 fw-bold text-white mb-1">Frequently Asked Questions</h2>
+            <p class="text-white-50 mb-0">Everything you need to know about shifts, holds, refunds, and AWD support.</p>
+          </div>
+          <a class="btn btn-accent px-4 py-2" href="contact.html">💬 Contact Support</a>
         </div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd; box-shadow:var(--shadow-sm);">
-          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: How does the shift-based appointment system work?</h4>
-          <p style="color:#555; line-height:1.7;">
-            A: Each day offers three 4-hour grooming shifts: Shift 1 (7:00 AM – 11:00 AM), Shift 2 (12:00 NN – 4:00 PM), and Shift 3 (5:00 PM – 9:00 PM). Each shift has a fixed capacity of exactly 3 pets to ensure high-quality, stress-free care. Periods between 11:00 AM–12:00 NN and 4:00 PM–5:00 PM are dedicated breaks.
+      <div class="d-flex flex-column gap-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4" style="border-left: 5px solid var(--color-navy) !important;">
+          <h4 class="fw-bold mb-2" style="color:var(--color-navy);">Q: How does the shift-based appointment system work?</h4>
+          <p class="text-muted mb-0" style="line-height:1.7;">
+            <strong>A:</strong> Each day offers three 4-hour grooming shifts: <strong>Shift 1 (7:00 AM – 11:00 AM)</strong>, <strong>Shift 2 (12:00 NN – 4:00 PM)</strong>, and <strong>Shift 3 (5:00 PM – 9:00 PM)</strong>. Each shift has a fixed capacity of exactly <strong>3 pets</strong> to ensure calm, unhurried treatment. The periods between 11:00 AM–12:00 NN and 4:00 PM–5:00 PM are dedicated sanitization and staff rest breaks.
           </p>
         </div>
 
-        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd; box-shadow:var(--shadow-sm);">
-          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: How does the 15-minute payment hold work?</h4>
-          <p style="color:#555; line-height:1.7;">
-            A: When you confirm your booking review and submit, your slot is placed On Hold for 15 minutes. If simulated payment (20% down or full) is completed, your booking becomes Confirmed. If the 15-minute countdown expires, the hold is automatically cancelled and the slot is made available to other customers.
+        <div class="card border-0 shadow-sm rounded-4 p-4" style="border-left: 5px solid var(--color-butterscotch) !important;">
+          <h4 class="fw-bold mb-2" style="color:var(--color-navy);">Q: How does the 15-minute payment hold work?</h4>
+          <p class="text-muted mb-0" style="line-height:1.7;">
+            <strong>A:</strong> When you submit a booking, the shift capacity is immediately reserved <strong>On Hold for 15 minutes</strong> with a live timer. Once your simulated payment (20% down payment or full amount) is confirmed, your booking becomes <strong>Confirmed</strong>. If the 15-minute countdown runs out, the reserved slot is automatically released to other customers.
           </p>
         </div>
 
-        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd; box-shadow:var(--shadow-sm);">
-          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: What is the cancellation and refund policy?</h4>
-          <p style="color:#555; line-height:1.7;">
-            A: If you cancel at least 24 hours before your scheduled appointment shift start time, you receive a full simulated refund of amounts paid online. Cancellations made less than 24 hours prior are not eligible for a refund.
+        <div class="card border-0 shadow-sm rounded-4 p-4" style="border-left: 5px solid var(--color-rose) !important;">
+          <h4 class="fw-bold mb-2" style="color:var(--color-navy);">Q: What is the cancellation and refund policy?</h4>
+          <p class="text-muted mb-0" style="line-height:1.7;">
+            <strong>A:</strong> Cancellations made at least <strong>24 hours before</strong> your appointment shift start time receive a <strong>100% full simulated refund</strong> of amounts paid online. Cancellations made less than 24 hours prior to the shift are non-refundable as the grooming slot was reserved for your pet.
           </p>
         </div>
 
-        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd; box-shadow:var(--shadow-sm);">
-          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: What is the Animals with Disability (AWD) Discount?</h4>
-          <p style="color:#555; line-height:1.7;">
-            A: Pet owners with pets experiencing physical disabilities, mobility difficulties, or special needs can declare their condition and optionally upload a supporting document to receive an automatic 20% demonstration discount on their booking total.
+        <div class="card border-0 shadow-sm rounded-4 p-4" style="border-left: 5px solid var(--color-forest) !important;">
+          <h4 class="fw-bold mb-2" style="color:var(--color-navy);">Q: What is the Animals with Disability (AWD) Discount?</h4>
+          <p class="text-muted mb-0" style="line-height:1.7;">
+            <strong>A:</strong> We proudly offer an inclusive care discount! Pet parents whose pets have physical challenges, blindness, amputation, or mobility difficulties can declare their condition and optionally upload supporting documents to receive an automatic <strong>20% discount</strong> on their entire booking total.
           </p>
         </div>
 
-        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #ddd; box-shadow:var(--shadow-sm);">
-          <h4 style="color:var(--color-navy); margin-bottom:6px;">Q: Can I reschedule my appointment?</h4>
-          <p style="color:#555; line-height:1.7;">
-            A: Yes! You can reschedule upcoming appointments directly through My Bookings. The system checks capacity on the new shift before releasing the previous slot. Rescheduling retains your original reference number and payment without extra fees.
+        <div class="card border-0 shadow-sm rounded-4 p-4" style="border-left: 5px solid var(--color-navy) !important;">
+          <h4 class="fw-bold mb-2" style="color:var(--color-navy);">Q: Can I reschedule my appointment?</h4>
+          <p class="text-muted mb-0" style="line-height:1.7;">
+            <strong>A:</strong> Yes! You can reschedule upcoming appointments directly through <em>My Bookings</em> at zero additional fee. The system checks capacity on your desired new shift before releasing your existing slot, keeping your payment and reference code secure.
           </p>
+        </div>
+      </div>
+
+      <!-- Still Have Questions CTA -->
+      <div class="card border-0 rounded-4 p-4 mt-4 shadow-sm text-center" style="background: linear-gradient(135deg, #fffcf5, #ffffff); border: 2px dashed var(--color-butterscotch) !important;">
+        <h4 class="fw-bold mb-2" style="color:var(--color-navy);">Still Have Questions?</h4>
+        <p class="text-muted mb-3">Our friendly team is always ready to assist you and your furry companions!</p>
+        <div>
+          <a class="btn btn-navy px-4" href="contact.html">💬 Send us a Message</a>
         </div>
       </div>
     </section>
 
     <!-- 2. TERMS & CONDITIONS VIEW -->
     <section id="terms-view" class="view-section">
-      <div class="step-header">
-        <div>
-          <h2>Terms &amp; Conditions</h2>
-          <p style="color:var(--color-text-muted);">Appointment rules, payment obligations, and salon policies.</p>
-        </div>
+      <div class="page-hero-banner mb-4 p-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-dark) 100%);">
+        <h2 class="display-6 fw-bold text-white mb-1">Terms &amp; Conditions</h2>
+        <p class="text-white-50 mb-0">Service terms, booking policies, and salon standards for pet safety.</p>
       </div>
 
-      <div style="background:#fff; padding:28px; border-radius:12px; border:1px solid #ddd; line-height:1.8; color:#444; box-shadow:var(--shadow-sm);">
-        <h4 style="color:var(--color-navy);">1. Appointment Capacity &amp; Pet Welfare</h4>
-        <p>Each shift is restricted to a maximum of 3 pets to guarantee individual attention and prevent distress. Pet owners must ensure their pet is reasonably vaccinated and free of severe infectious conditions upon drop-off.</p>
+      <div class="card border-0 shadow-sm rounded-4 p-4" style="line-height:1.8; color:#444;">
+        <h4 class="fw-bold mb-2" style="color:var(--color-navy);">1. Appointment Capacity &amp; Pet Welfare</h4>
+        <p>Each shift is strictly restricted to a maximum of 3 pets to guarantee individual care and prevent stress. Pet owners must ensure their pet is reasonably vaccinated and free of severe contagious conditions upon drop-off.</p>
 
-        <h4 style="color:var(--color-navy); margin-top:16px;">2. Payment Terms</h4>
-        <p>Customers may choose between a 20% down payment or 100% full payment at the time of online reservation. Any remaining balance is payable upon picking up your groomed pet at our shop.</p>
+        <h4 class="fw-bold mb-2 mt-4" style="color:var(--color-navy);">2. Payment Terms</h4>
+        <p>Customers may choose between a 20% down payment or 100% full payment at the time of online reservation. Any remaining balance is payable in cash upon picking up your groomed pet at our shop.</p>
 
-        <h4 style="color:var(--color-navy); margin-top:16px;">3. Cancellation and Rescheduling Policy</h4>
+        <h4 class="fw-bold mb-2 mt-4" style="color:var(--color-navy);">3. Cancellation and Rescheduling Policy</h4>
         <p>Appointments may be rescheduled to another shift at no penalty provided the new shift has available capacity. Cancellations made at least 24 hours in advance receive a full simulated refund.</p>
       </div>
     </section>
 
     <!-- 3. PRIVACY POLICY VIEW -->
     <section id="privacy-view" class="view-section">
-      <div class="step-header">
-        <div>
-          <h2>Privacy Policy</h2>
-          <p style="color:var(--color-text-muted);">How customer and pet information is collected, stored, and protected.</p>
-        </div>
+      <div class="page-hero-banner mb-4 p-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-dark) 100%);">
+        <h2 class="display-6 fw-bold text-white mb-1">Privacy Policy</h2>
+        <p class="text-white-50 mb-0">How customer and pet information is collected, stored, and protected.</p>
       </div>
 
-      <div style="background:#fff; padding:28px; border-radius:12px; border:1px solid #ddd; line-height:1.8; color:#444; box-shadow:var(--shadow-sm);">
-        <h4 style="color:var(--color-navy);">1. Information Collected</h4>
+      <div class="card border-0 shadow-sm rounded-4 p-4" style="line-height:1.8; color:#444;">
+        <h4 class="fw-bold mb-2" style="color:var(--color-navy);">1. Information Collected</h4>
         <p>We collect customer account information including your name, email address, phone number, and birthdate. For grooming preparations, we collect pet details including pet name, species, breed, recorded weight, care notes, pet photos, and optional AWD disability declarations.</p>
 
-        <h4 style="color:var(--color-navy); margin-top:16px;">2. Use of Information</h4>
+        <h4 class="fw-bold mb-2 mt-4" style="color:var(--color-navy);">2. Use of Information</h4>
         <p>Information is used exclusively to facilitate shift scheduling, calculate grooming durations and pricing, contact you regarding appointment updates, and prepare personalized grooming care.</p>
 
-        <h4 style="color:var(--color-navy); margin-top:16px;">3. Storage and Protection</h4>
+        <h4 class="fw-bold mb-2 mt-4" style="color:var(--color-navy);">3. Storage and Protection</h4>
         <p>Customer passwords and authentication sessions are secured via industry-standard protocols. Pet photos and AWD supporting documents are stored separately and securely.</p>
       </div>
     </section>
