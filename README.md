@@ -43,7 +43,7 @@ To eliminate long queues, phone inquiries, double-bookings, and misplaced pet re
 
 ## Tools Used
 
-- **Front-End Development:** HTML5, CSS3, JavaScript (ES6)
+- **Front-End Development:** HTML5, CSS3, JavaScript (ES6), Bootstrap 5.3
 - **Cloud & Backend Services:** Firebase Authentication, Cloud Firestore, Firebase Storage, Firebase Hosting, Firebase Cloud Functions
 - **Design & Prototyping:** Figma, Canva
 - **Code Editor & Version Control:** Visual Studio Code, Git, GitHub
