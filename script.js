@@ -1,9 +1,3 @@
-/**
- * Fur & Bubbles Grooming Services - Main Script
- * Strictly adhering to proposal specifications, wireframes, pricing tables, and business rules.
- */
-
-// PRICING AND SERVICE DEFINITIONS (Tables 3, 4, 5, 8, 9, 10)
 const SERVICE_DATA = {
   sizes: ['Small', 'Medium', 'Large', 'Giant'],
   
@@ -168,12 +162,6 @@ function initializeDefaultData() {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(defaultUsers));
   }
 
-  if (!localStorage.getItem(STORAGE_KEYS.CURRENT_USER)) {
-    // Start with logged in demo user for seamless evaluation, but allow log out
-    const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS));
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(users[0]));
-  }
-
   if (!localStorage.getItem(STORAGE_KEYS.PETS)) {
     const defaultPets = [
       {
@@ -300,6 +288,62 @@ function getFormattedDateStr(dateObj) {
   return `${y}-${m}-${d}`;
 }
 
+// Saves the signed-in user. remember=true keeps them signed in after the browser closes.
+function saveCurrentUser(user, remember) {
+  const json = JSON.stringify(user);
+  if (remember) {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, json);
+    sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+  } else {
+    sessionStorage.setItem(STORAGE_KEYS.CURRENT_USER, json);
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+  }
+}
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
+
+function validateUploadFile(file, allowedTypes, label) {
+  if (!allowedTypes.includes(file.type)) {
+    const names = allowedTypes.map(t => t === 'application/pdf' ? 'PDF' : t.split('/')[1].toUpperCase().replace('JPEG', 'JPG'));
+    alert(`${label} must be a ${[...new Set(names)].join(', ')} file.`);
+    return false;
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    alert(`${label} is too large. The maximum file size is 5MB.`);
+    return false;
+  }
+  return true;
+}
+
+// Shrinks a photo (max 600px) and saves it as JPEG so it fits in localStorage
+function compressImageToDataUrl(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 600 / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+       callback(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => alert('This image could not be read. Please try another photo.');
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function formatMonthYear(dateStr) {
+  if (!dateStr) return '';
+  const [y, m] = dateStr.split('-');
+  return new Date(parseInt(y), parseInt(m) - 1, 1)
+    .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
 function formatDateReadable(dateStr) {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-');
@@ -376,7 +420,8 @@ const App = {
 
   init: function() {
     initializeDefaultData();
-    this.currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null');
+    this.currentUser = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER) || localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null');
+    this.migrateLegacyBookings();
     this.updateUserNavigation();
     this.checkAndExpireHolds();
     this.checkPastBookings();
@@ -394,8 +439,13 @@ const App = {
     
     if (document.getElementById(targetView)) {
       this.routeTo(targetView);
-    } else if (firstSection) {
+        } else if (firstSection) {
       this.routeTo(firstSection.id);
+    }
+
+    // Header "Sign In" on other pages opens the standalone sign-in screen
+    if (viewFromParam === 'sign-in') {
+      this.openStandaloneAuth();
     }
 
     // Run hold & past checker every 10 seconds
@@ -403,6 +453,21 @@ const App = {
       this.checkAndExpireHolds();
       this.checkPastBookings();
     }, 10000);
+  },
+
+  // Older saved bookings may have no amountPaid; work it out so they don't show PHP 0
+  migrateLegacyBookings: function() {
+    const bookings = JSON.parse(localStorage.getItem(STORAGE_KEYS.BOOKINGS) || '[]');
+    let changed = false;
+    bookings.forEach(b => {
+      if (typeof b.amountPaid !== 'number') {
+        if (b.paymentStatus === 'Fully Paid') b.amountPaid = b.totalAmount;
+        else if (b.paymentStatus === 'Partially Paid') b.amountPaid = Math.max(0, b.totalAmount - (b.remainingBalance || 0));
+        else b.amountPaid = 0;
+        changed = true;
+      }
+    });
+    if (changed) localStorage.setItem(STORAGE_KEYS.BOOKINGS, JSON.stringify(bookings));
   },
 
   // ROUTING & NAVIGATION
@@ -421,8 +486,18 @@ const App = {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Update active nav link
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.nav-link').forEach(link => {
-      link.classList.toggle('active', link.dataset.view === viewId);
+      const onclickAttr = link.getAttribute('onclick') || '';
+      const hrefAttr = link.getAttribute('href') || '';
+      const viewMatch = onclickAttr.match(/routeTo\('([^']+)'\)/);
+      let isActive = false;
+      if (viewMatch) {
+        isActive = (viewMatch[1] === viewId);
+      } else if (hrefAttr && !hrefAttr.startsWith('javascript')) {
+        isActive = (hrefAttr.split('?')[0] === currentPage) && viewId !== 'my-bookings-view' && viewId !== 'booking-history-view';
+      }
+      link.classList.toggle('active', isActive);
     });
 
     // Close any open account dropdown
@@ -673,13 +748,66 @@ const App = {
   },
 
   // BOOKING WIZARD STEP CONTROLLER
+    currentStep: 1,
+
+  // Stepper clicks only go BACK, and not once payment has started
+  goToStep: function(n) {
+    if (n < this.currentStep && this.currentStep < 6) {
+      this.setupBookingStep(n);
+    }
+  },
+
+  // STEPPER CLICK HANDLER (blocks jumping ahead without required info)
+  goToStep: function(step) {
+    // Payment and confirmation can't be reached by clicking the stepper
+    const draft = this.bookingDraft;
+    if (draft.activeHoldBookingId) return; // booking already submitted
+
+    // Can't jump past Services/Schedule without a valid selection
+    if (step >= 3 && !draft.date) {
+      alert('Please choose an appointment date and shift first.');
+      this.setupBookingStep(2);
+      return;
+    }
+    // Pet details required before Review
+    if (step === 5 && !draft.petName) {
+      alert('Please complete the pet details first.');
+      this.setupBookingStep(4);
+      return;
+    }
+    this.setupBookingStep(step);
+  },
+
+  // BOOKING WIZARD STEP CONTROLLER
   setupBookingStep: function(stepNumber) {
+    // Leaving the sign-in step ends the standalone sign-in screen
+    if (stepNumber !== 3) {
+      this.standaloneAuth = false;
+      const stepperEl = document.querySelector('.stepper-wrapper');
+      if (stepperEl) stepperEl.style.display = '';
+    }
+
+    // Guests cannot go past the sign-in step
+    if (!this.currentUser && stepNumber >= 4) {
+      alert('Please sign in or create an account to continue your booking.');
+      stepNumber = 3;
+    }
+    // A date and shift must be chosen before steps 3-5
+    if (stepNumber >= 3 && stepNumber <= 5 && (!this.bookingDraft.date || !this.bookingDraft.shiftId)) {
+      stepNumber = 2;
+    }
+    // A pet must be entered before the review step
+    if (stepNumber === 5 && !this.bookingDraft.petName) {
+      stepNumber = 4;
+    }
+    this.currentStep = stepNumber;
+
     // Hide all steps
     document.querySelectorAll('.booking-wizard-step').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
 
     // Highlight stepper
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
       const stepItem = document.getElementById(`stepperItem${i}`);
       if (stepItem) {
         if (i < stepNumber) {
@@ -994,13 +1122,6 @@ const App = {
 
   // STEP 2: APPOINTMENT SCHEDULE & CALENDAR
   renderScheduleStep: function() {
-    if (!this.bookingDraft.date) {
-      // Set default date to tomorrow
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      this.bookingDraft.date = getFormattedDateStr(tomorrow);
-    }
-
     this.renderCalendar();
     this.renderShiftsList();
   },
@@ -1049,7 +1170,7 @@ const App = {
     // Update Selected Date Display
     const dateDisplay = document.getElementById('selectedDateDisplaySummary');
     if (dateDisplay) {
-      dateDisplay.textContent = formatDateReadable(this.bookingDraft.date);
+      dateDisplay.textContent = this.bookingDraft.date ? formatDateReadable(this.bookingDraft.date) : 'Please select a date';
     }
   },
 
@@ -1082,6 +1203,16 @@ const App = {
     if (!container) return;
 
     const dateStr = this.bookingDraft.date;
+    const nextBtn = document.getElementById('btnScheduleStepNext');
+    const shiftSummary = document.getElementById('selectedShiftDisplaySummary');
+
+    if (!dateStr) {
+      container.innerHTML = '<p style="color:var(--color-text-muted); font-style:italic;">Please choose a date on the calendar to see the available shifts.</p>';
+      if (nextBtn) nextBtn.disabled = true;
+      if (shiftSummary) shiftSummary.textContent = 'Please select a shift';
+      return;
+    }
+
     const calc = this.calculateBookingTotals(this.bookingDraft);
 
     let html = '';
@@ -1125,11 +1256,14 @@ const App = {
 
     container.innerHTML = html;
 
-    // Check if currently selected shift is valid
-    const currentShiftCap = this.getShiftCapacityInfo(dateStr, this.bookingDraft.shiftId);
-    const nextBtn = document.getElementById('btnScheduleStepNext');
+    const chosenShift = SERVICE_DATA.shifts.find(s => s.id === this.bookingDraft.shiftId);
+    const currentShiftCap = chosenShift ? this.getShiftCapacityInfo(dateStr, chosenShift.id) : null;
+    const shiftOk = !!chosenShift && !currentShiftCap.isFull;
     if (nextBtn) {
-      nextBtn.disabled = currentShiftCap.isFull;
+      nextBtn.disabled = !shiftOk;
+    }
+    if (shiftSummary) {
+      shiftSummary.textContent = shiftOk ? `${chosenShift.name} (${chosenShift.time})` : 'Please select a shift';
     }
   },
 
@@ -1141,8 +1275,41 @@ const App = {
     }
   },
 
-  // STEP 3: AUTHENTICATION (Sign In / Register / Simulated OAuth)
+    // STEP 3: AUTHENTICATION (Sign In / Register / Simulated OAuth)
+  standaloneAuth: false,
+
+  // Sign In / Create Account on its own (not part of a booking)
+  openStandaloneAuth: function() {
+    if (this.currentUser) {
+      this.routeTo('my-bookings-view');
+      return;
+    }
+    this.routeTo('booking-view');
+    this.standaloneAuth = true;
+    this.setupBookingStep(3);
+  },
+
+  // After login/register: continue the booking, or go to My Bookings if standalone
+  afterAuthSuccess: function() {
+    if (this.standaloneAuth) {
+      this.standaloneAuth = false;
+      const stepperEl = document.querySelector('.stepper-wrapper');
+      if (stepperEl) stepperEl.style.display = '';
+      this.routeTo('my-bookings-view');
+    } else {
+      this.setupBookingStep(4);
+    }
+  },
+
   renderAuthStep: function() {
+    const standalone = this.standaloneAuth;
+    document.getElementById('authStepTitle').textContent = standalone ? 'Sign In / Create Account' : 'Step 3: Customer Sign In / Register';
+    document.getElementById('authStepSubtitle').textContent = standalone
+      ? 'Access your bookings, saved pets, and account details.'
+      : 'Your selected services, date, and shift are securely saved.';
+    document.getElementById('authBackBtn').style.display = standalone ? 'none' : '';
+    const stepperEl = document.querySelector('.stepper-wrapper');
+    if (stepperEl) stepperEl.style.display = standalone ? 'none' : '';
     this.switchAuthTab('login');
   },
 
@@ -1165,20 +1332,27 @@ const App = {
     }
   },
 
-  handleLogin: function(e) {
+    handleLogin: function(e) {
     if (e) e.preventDefault();
     const email = document.getElementById('loginEmailInput').value.trim();
     const password = document.getElementById('loginPasswordInput').value;
+    const remember = document.getElementById('loginRememberMe')?.checked;
 
     const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
 
     if (user) {
       this.currentUser = user;
-      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+      // Remember me: persist across browser restarts. Otherwise: this tab session only.
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      if (remember) {
+        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+      } else {
+        sessionStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+      }
       this.updateUserNavigation();
-      // Keep selections and continue directly to Pet Form!
-      this.setupBookingStep(4);
+      this.afterAuthSuccess();
     } else {
       alert('Invalid email or password. Please try again. (Demo account: capawlong@gmail.com / password123)');
     }
@@ -1222,10 +1396,10 @@ const App = {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
 
     this.currentUser = newUser;
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(newUser));
+    saveCurrentUser(newUser, true);
     this.updateUserNavigation();
-    alert('Account created successfully! Proceeding to Pet Details.');
-    this.setupBookingStep(4);
+    alert('Account created successfully!');
+    this.afterAuthSuccess();
   },
 
   // SIMULATED GOOGLE / APPLE SIGN-IN
@@ -1283,10 +1457,10 @@ const App = {
       users.push(user);
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
     }
-    this.currentUser = user;
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+        this.currentUser = user;
+    saveCurrentUser(user, true);
     this.updateUserNavigation();
-    this.setupBookingStep(4);
+    this.afterAuthSuccess();
   },
 
   // STEP 4: PET FORM
@@ -1416,35 +1590,37 @@ const App = {
     }
   },
 
-  handlePetPhotoUpload: function(event) {
+    handlePetPhotoUpload: function(event) {
     const file = event.target.files[0];
-    if (file) {
-      if (!file.type.match('image.*')) {
-        alert('Please upload a valid image file (JPG or PNG).');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        App.bookingDraft.petPhoto = e.target.result;
-        const previewImg = document.getElementById('petPhotoPreview');
-        const placeholder = document.getElementById('petPhotoPlaceholder');
-        previewImg.src = e.target.result;
-        previewImg.style.display = 'block';
-        if (placeholder) placeholder.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    if (!validateUploadFile(file, ['image/jpeg', 'image/png'], 'Pet photo')) {
+      event.target.value = '';
+      return;
     }
+    compressImageToDataUrl(file, (dataUrl) => {
+      App.bookingDraft.petPhoto = dataUrl;
+      const previewImg = document.getElementById('petPhotoPreview');
+      const placeholder = document.getElementById('petPhotoPlaceholder');
+      previewImg.src = dataUrl;
+      previewImg.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+    });
   },
 
-  handleAwdDocUpload: function(event) {
+    handleAwdDocUpload: function(event) {
     const file = event.target.files[0];
-    if (file) {
-      App.bookingDraft.awdDocumentName = file.name;
-      const fileNameEl = document.getElementById('awdUploadedDocName');
-      if (fileNameEl) {
-        fileNameEl.textContent = `Attached: ${file.name}`;
-        fileNameEl.style.display = 'block';
-      }
+    const fileNameEl = document.getElementById('awdUploadedDocName');
+    if (!file) return;
+    if (!validateUploadFile(file, ['application/pdf', 'image/jpeg', 'image/png'], 'Supporting document')) {
+      event.target.value = '';
+      App.bookingDraft.awdDocumentName = '';
+      if (fileNameEl) fileNameEl.style.display = 'none';
+      return;
+    }
+    App.bookingDraft.awdDocumentName = file.name;
+    if (fileNameEl) {
+      fileNameEl.textContent = `Attached: ${file.name}`;
+      fileNameEl.style.display = 'block';
     }
   },
 
@@ -1527,6 +1703,9 @@ const App = {
 
   // STEP 5: BOOKING REVIEW & EDIT LOOP
   renderBookingReviewStep: function() {
+    const confirmBox = document.getElementById('reviewConfirmAccurate');
+    if (confirmBox) confirmBox.checked = false;
+
     const draft = this.bookingDraft;
     const calc = this.calculateBookingTotals(draft);
     const shift = SERVICE_DATA.shifts.find(s => s.id === draft.shiftId) || SERVICE_DATA.shifts[0];
@@ -1614,6 +1793,11 @@ const App = {
   // STEP 6: SUBMIT & PAY (15-Minute Countdown & Simulated QR)
   submitBookingAndOpenPayment: function() {
     const draft = this.bookingDraft;
+    const confirmBox = document.getElementById('reviewConfirmAccurate');
+    if (confirmBox && !confirmBox.checked) {
+      alert('Please tick the box to confirm that your booking details are accurate before submitting.');
+      return;
+    }
 
     // Check capacity first to avoid race conditions!
     const cap = this.getShiftCapacityInfo(draft.date, draft.shiftId);
@@ -1848,6 +2032,16 @@ const App = {
       return;
     }
 
+        // The hold must still be active (not expired or cancelled) before payment is recorded
+    const holdExpired = booking.paymentDeadline && Date.now() >= new Date(booking.paymentDeadline).getTime();
+    if (booking.bookingStatus !== 'On Hold' || holdExpired) {
+      this.stopHoldTimer();
+      this.checkAndExpireHolds();
+      alert('Your 15-minute hold has expired and the slot was released. Please submit a new booking.');
+      this.routeTo('my-bookings-view');
+      return;
+    }
+
     this.stopHoldTimer();
 
     const isDown = (booking.paymentOption === 'down');
@@ -1878,6 +2072,7 @@ const App = {
 
     document.getElementById('confirmRefNumber').textContent = booking.referenceNumber;
     document.getElementById('confirmDateShift').textContent = `${formatDateReadable(booking.appointmentDate)} • ${booking.shiftName} (${booking.shiftTime})`;
+    document.getElementById('confirmBookingStatus').textContent = booking.bookingStatus;
     document.getElementById('confirmPetDetails').textContent = `${booking.pet.name} (${booking.pet.breed}, ${booking.pet.weight}kg - ${booking.pet.sizeCategory})`;
 
     const servicesNames = [];
@@ -1920,7 +2115,7 @@ const App = {
       isWeightEstimated: false,
       sizeCategory: 'Small',
       date: '',
-      shiftId: 'shift_1',
+      shiftId: '',
       petId: '',
       petName: '',
       species: 'Dog',
@@ -1965,8 +2160,23 @@ const App = {
       return;
     }
 
+        // Sort by the dropdown value
+    const myOrder = document.getElementById('myBookingsSortOrderSelect')?.value || 'soonest';
+    upcoming.sort((a, b) => {
+      const diff = new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime();
+      return myOrder === 'soonest' ? diff : -diff;
+    });
+
     let html = '';
+    let lastMonth = '';
     upcoming.forEach(b => {
+      // Month heading whenever the month changes
+      const monthLabel = formatMonthYear(b.appointmentDate);
+      if (monthLabel !== lastMonth) {
+        html += `<h3 class="booking-month-heading">${monthLabel}</h3>`;
+        lastMonth = monthLabel;
+      }
+
       const isOnHold = (b.bookingStatus === 'On Hold');
       const isConfirmed = (b.bookingStatus === 'Confirmed');
 
@@ -2006,7 +2216,11 @@ const App = {
                 <strong>Total Amount:</strong> ₱${b.totalAmount.toLocaleString()} 
                 ${b.discountAmount > 0 ? `<span style="color:var(--color-rose); font-weight:700;">(AWD 20% Applied)</span>` : ''}
               </p>
-              ${b.remainingBalance > 0 ? `
+              ${isOnHold ? `
+                <p style="font-size:0.9rem; color:var(--color-inferno); font-weight:800; margin-top:4px;">
+                  ⏱️ Pay before ${b.paymentDeadline ? new Date(b.paymentDeadline).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'the deadline'} or this slot will be released.
+                </p>
+              ` : b.remainingBalance > 0 ? `
                 <p style="font-size:0.9rem; color:var(--color-inferno); font-weight:800; margin-top:4px;">
                   ⚠️ Remaining Balance: ₱${b.remainingBalance.toLocaleString()} (Pay in cash at shop before grooming)
                 </p>
@@ -2075,7 +2289,14 @@ const App = {
     }
 
     let html = '';
+    let lastMonth = '';
     historyList.forEach(b => {
+      const monthLabel = formatMonthYear(b.appointmentDate);
+      if (monthLabel !== lastMonth) {
+        html += `<h3 class="booking-month-heading">${monthLabel}</h3>`;
+        lastMonth = monthLabel;
+      }
+
       const isPast = (b.bookingStatus === 'Past');
       const servicesSummary = b.bookingType === 'package' 
         ? (SERVICE_DATA.packages[b.packageId] ? SERVICE_DATA.packages[b.packageId].name : 'Package')
@@ -2415,7 +2636,7 @@ const App = {
     this.currentUser.phone = document.getElementById('profilePhoneInput').value.trim();
     this.currentUser.birthdate = document.getElementById('profileBirthdateInput').value;
 
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(this.currentUser));
+    saveCurrentUser(this.currentUser, !sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER));
 
     const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     const idx = users.findIndex(u => u.id === this.currentUser.id);
@@ -2451,7 +2672,8 @@ const App = {
             <p style="font-size:0.85rem; color:#666;">${p.species} • ${p.breed}</p>
             <p style="font-size:0.85rem; color:#555; margin-top:4px;"><em>${p.careNotes || 'No special notes'}</em></p>
           </div>
-          <div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick="App.openEditPetModal('${p.id}')">Edit</button>
             <button class="btn btn-primary btn-sm" onclick="App.startBookingForPet('${p.id}')">Book with Pet</button>
           </div>
         </div>
@@ -2468,26 +2690,57 @@ const App = {
   },
 
   openAddPetModal: function() {
-    document.getElementById('modalAddPetName').value = '';
-    document.getElementById('modalAddPetBreed').value = '';
-    document.getElementById('modalAddPetWeight').value = '';
-    document.getElementById('modalAddPetNotes').value = '';
-    document.getElementById('modalAddPetPhoto').value = '';
-    this.tempModalPetPhoto = '';
-    document.getElementById('addPetModal').classList.add('show');
-  },
+  document.getElementById('modalAddPetName').value = '';
+  document.getElementById('modalAddPetBreed').value = '';
+  document.getElementById('modalAddPetWeight').value = '';
+  document.getElementById('modalAddPetNotes').value = '';
+  document.getElementById('modalAddPetPhoto').value = '';
+  this.tempModalPetPhoto = '';
+  this.editingPetId = null;
+  document.getElementById('modalAddPetSpecies').value = 'Dog';
+  document.getElementById('addPetModalTitle').textContent = 'Add New Pet Profile';
+  document.getElementById('addPetSaveBtn').textContent = 'Save Pet Profile';
+  document.getElementById('modalAddPetPhotoPreview').style.display = 'none';
+  document.getElementById('addPetModal').classList.add('show');
+},
 
-  tempModalPetPhoto: '',
+tempModalPetPhoto: '',
+editingPetId: null,
+
+openEditPetModal: function(petId) {
+  const allPets = JSON.parse(localStorage.getItem(STORAGE_KEYS.PETS) || '[]');
+  const pet = allPets.find(p => p.id === petId && p.userId === this.currentUser.id);
+  if (!pet) return;
+
+  this.editingPetId = pet.id;
+  this.tempModalPetPhoto = pet.photo || '';
+  document.getElementById('modalAddPetName').value = pet.name;
+  document.getElementById('modalAddPetSpecies').value = pet.species;
+  document.getElementById('modalAddPetBreed').value = pet.breed;
+  document.getElementById('modalAddPetWeight').value = pet.weight;
+  document.getElementById('modalAddPetNotes').value = pet.careNotes || '';
+  document.getElementById('modalAddPetPhoto').value = '';
+  document.getElementById('addPetModalTitle').textContent = 'Edit Pet Profile';
+  document.getElementById('addPetSaveBtn').textContent = 'Save Changes';
+  const preview = document.getElementById('modalAddPetPhotoPreview');
+  preview.src = this.tempModalPetPhoto;
+  preview.style.display = this.tempModalPetPhoto ? 'block' : 'none';
+  document.getElementById('addPetModal').classList.add('show');
+},
 
   handleModalPetPhotoUpload: function(event) {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        App.tempModalPetPhoto = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    if (!validateUploadFile(file, ['image/jpeg', 'image/png'], 'Pet photo')) {
+      event.target.value = '';
+      return;
     }
+    compressImageToDataUrl(file, (dataUrl) => {
+      App.tempModalPetPhoto = dataUrl;
+      const preview = document.getElementById('modalAddPetPhotoPreview');
+      preview.src = dataUrl;
+      preview.style.display = 'block';
+    });
   },
 
   saveNewPetFromModal: function() {
@@ -2507,23 +2760,30 @@ const App = {
       return;
     }
 
-    const allPets = JSON.parse(localStorage.getItem(STORAGE_KEYS.PETS) || '[]');
-    const newPet = {
-      id: 'pet_' + Date.now(),
-      userId: this.currentUser.id,
-      name: name,
-      species: species,
-      breed: breed,
-      weight: weight,
-      careNotes: notes,
-      photo: this.tempModalPetPhoto
-    };
+        const allPets = JSON.parse(localStorage.getItem(STORAGE_KEYS.PETS) || '[]');
+    const isEditing = !!this.editingPetId;
 
-    allPets.push(newPet);
+    if (isEditing) {
+      const idx = allPets.findIndex(p => p.id === this.editingPetId && p.userId === this.currentUser.id);
+      if (idx === -1) { alert('Could not find this pet profile.'); return; }
+      allPets[idx] = Object.assign({}, allPets[idx], {
+        name: name, species: species, breed: breed,
+        weight: weight, careNotes: notes, photo: this.tempModalPetPhoto
+      });
+    } else {
+      allPets.push({
+        id: 'pet_' + Date.now(),
+        userId: this.currentUser.id,
+        name: name, species: species, breed: breed,
+        weight: weight, careNotes: notes, photo: this.tempModalPetPhoto
+      });
+    }
+
     localStorage.setItem(STORAGE_KEYS.PETS, JSON.stringify(allPets));
     document.getElementById('addPetModal').classList.remove('show');
+    this.editingPetId = null;
     this.renderProfilePetsList();
-    alert('Pet profile added successfully!');
+    alert(isEditing ? 'Pet profile updated successfully!' : 'Pet profile added successfully!');
   },
 
   // LOGOUT
@@ -2531,6 +2791,7 @@ const App = {
     if (confirm('Are you sure you want to log out?')) {
       this.currentUser = null;
       localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+      sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       this.updateUserNavigation();
       this.routeTo('home-view');
     }
