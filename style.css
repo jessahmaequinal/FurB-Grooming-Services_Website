@@ -2169,14 +2169,14 @@ a:hover {
 }
 
 .site-logo {
-  height: 52px;
+  height: 68px;
   width: auto;
   border-radius: 10px;
   display: block;
 }
 
 .site-logo-footer {
-  height: 64px;
+  height: 96px;
   width: auto;
   border-radius: 10px;
   display: block;
@@ -2184,7 +2184,20 @@ a:hover {
 }
 
 @media (max-width: 640px) {
-  .site-logo { height: 42px; }
+  .site-logo { height: 52px; }
+}
+
+.hero-logo {
+  width: 340px;
+  max-width: 100%;
+  height: auto;
+  flex-shrink: 0;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 768px) {
+  .hero-logo { width: 240px; }
 }
 
 /* =====================================================================
@@ -2280,4 +2293,110 @@ a:hover {
   .hero-welcome-title     { font-size: 2.2rem; }
   .hero-greeting          { font-size: 1.3rem; }
   .hero-card              { padding: 40px 20px; }
+}
+
+/* Home hero: force the 5/7 column split */
+#home-view .container-fluid > .row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 768px) {
+  #home-view .container-fluid > .row > .col-md-5 {
+    flex: 0 0 41.6667%;
+    max-width: 41.6667%;
+    min-width: 0;
+  }
+  #home-view .container-fluid > .row > .col-md-7 {
+    flex: 0 0 58.3333%;
+    max-width: 58.3333%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  #home-view .container-fluid > .row > .col-md-5,
+  #home-view .container-fluid > .row > .col-md-7 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+.social-icon-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+
+/* MOBILE FIXES (overlap, sticky header, tables) + PASSWORD RESET */
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 991px) {
+    .main-header {
+        position: static;
+    }
+}
+
+@media (max-width: 767px) {
+    .hero-tv-mascot {
+        transform: none !important;
+        margin-bottom: 36px;
+    }
+
+    .hero-welcome-title {
+        margin-top: 6px;
+    }
+
+    .custom-table {
+        min-width: 560px;
+    }
+
+    .step-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .booking-card-top {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+.sim-email-box {
+    border: 2px dashed var(--color-navy);
+    background: #f4f9fc;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 14px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.sim-email-box .sim-email-label {
+    display: inline-block;
+    background: var(--color-navy);
+    color: #fff;
+    border-radius: 50px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.sim-email-box a.sim-reset-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 9px 16px;
+    background: var(--color-forest);
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 800;
+    text-decoration: none;
 }

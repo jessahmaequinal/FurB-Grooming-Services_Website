@@ -633,7 +633,7 @@
         <!-- Payment Option Choice -->
         <h4 style="margin-bottom:12px; color:var(--color-navy);">Choose Payment Option:</h4>
         <div class="payment-options-grid">
-          <div class="payment-option-card selected" id="payCardDown" onclick="App.selectPaymentOption('down')">
+          <div class="payment-option-card selected" id="payCardDown" onclick="App.selectPaymentOption('down'); this.querySelector('input').checked = true;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <h4>20% Down Payment</h4>
               <input type="radio" name="payOptionRadio" value="down" checked>
@@ -644,7 +644,7 @@
             </p>
           </div>
 
-          <div class="payment-option-card" id="payCardFull" onclick="App.selectPaymentOption('full')">
+          <div class="payment-option-card" id="payCardFull" onclick="App.selectPaymentOption('full'); this.querySelector('input').checked = true;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <h4>100% Full Payment</h4>
               <input type="radio" name="payOptionRadio" value="full">
@@ -971,6 +971,63 @@
     </div>
   </div>
 
+
+<!-- FORGOT / RESET PASSWORD MODAL (demo: the "email" with the reset link is shown on screen) -->
+<div class="modal-overlay" id="forgotModal">
+    <div class="modal-content" style="max-width:460px;">
+        <button class="modal-close-btn">&times;</button>
+
+        <div id="forgotStepEmail">
+            <div class="modal-header">
+                <h3>Forgot Password?</h3>
+                <p style="font-size:0.85rem; color:#666;">
+                    Enter your registered email address and we will send you a password-reset link.
+                </p>
+            </div>
+
+            <form onsubmit="App.sendResetLink(event)">
+                <div class="form-group">
+                    <label class="form-label" for="forgotEmailInput">Email Address</label>
+                    <input type="email" id="forgotEmailInput" class="form-input" required placeholder="name@example.com">
+                </div>
+
+                <div id="forgotError" class="alert alert-danger" style="display:none; margin-bottom:10px;"></div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;">
+                    Send Reset Link
+                </button>
+            </form>
+
+            <div id="forgotSimEmail" class="sim-email-box" style="display:none;"></div>
+        </div>
+
+        <div id="forgotStepReset" style="display:none;">
+            <div class="modal-header">
+                <h3>Create a New Password</h3>
+                <p style="font-size:0.85rem; color:#666;" id="resetForEmailText"></p>
+            </div>
+
+            <form onsubmit="App.handleResetPassword(event)">
+                <div class="form-group">
+                    <label class="form-label" for="resetNewPassword">New Password</label>
+                    <input type="password" id="resetNewPassword" class="form-input" required minlength="6" placeholder="At least 6 characters">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="resetConfirmPassword">Confirm New Password</label>
+                    <input type="password" id="resetConfirmPassword" class="form-input" required minlength="6" placeholder="Repeat the new password">
+                </div>
+
+                <div id="resetError" class="alert alert-danger" style="display:none; margin-bottom:10px;"></div>
+
+                <button type="submit" class="btn btn-accent" style="width:100%;">
+                    Save New Password
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
   <!-- GLOBAL FOOTER -->
   <footer class="site-footer">
     <div class="footer-container">
@@ -981,8 +1038,8 @@
           Dedicated to quality bathing, styling, and stress-free grooming shifts for dogs and cats.
         </p>
         <div class="footer-social-icons">
-          <a href="https://facebook.com" target="_blank" class="social-icon-btn" title="Facebook">📘</a>
-          <a href="https://instagram.com" target="_blank" class="social-icon-btn" title="Instagram">📸</a>
+          <a href="https://facebook.com" target="_blank" class="social-icon-btn" title="Facebook"><img src="assets/facebook.svg" alt="Facebook" class="social-icon-img"></a>
+          <a href="https://instagram.com" target="_blank" class="social-icon-btn" title="Instagram"><img src="assets/instagram.svg" alt="Instagram" class="social-icon-img"></a>
           <a href="contact.html" class="social-icon-btn" title="Inquiries">💬</a>
         </div>
       </div>

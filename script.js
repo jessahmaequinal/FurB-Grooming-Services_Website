@@ -1,6 +1,6 @@
 const SERVICE_DATA = {
   sizes: ['Small', 'Medium', 'Large', 'Giant'],
-  
+
   // Table 3 & 8: À La Carte Services (Price & Duration)
   alaCarte: {
     bath_blowdry: {
@@ -368,7 +368,7 @@ function generateBookingReferenceNumber() {
 const App = {
   currentView: 'home-view',
   currentUser: null,
-  
+
   // CURRENT BOOKING DRAFT (Kept across steps and auth)
   bookingDraft: {
     bookingType: 'package', // 'package' or 'alaCarte'
@@ -436,16 +436,25 @@ const App = {
     const firstSection = document.querySelector('.view-section');
 
     const targetView = viewFromParam || viewFromHash || bodyDefault || (firstSection ? firstSection.id : 'home-view');
-    
-    if (document.getElementById(targetView)) {
-      this.routeTo(targetView);
-        } else if (firstSection) {
-      this.routeTo(firstSection.id);
+
+    if (viewFromParam === 'sign-in') {
+    this.standaloneAuth = true;
+    this.routeTo('booking-view');
+    this.setupBookingStep(3);
+    } else if (document.getElementById(targetView)) {
+        this.routeTo(targetView);
+    } else if (firstSection) {
+        this.routeTo(firstSection.id);
     }
 
     // Header "Sign In" on other pages opens the standalone sign-in screen
-    if (viewFromParam === 'sign-in') {
-      this.openStandaloneAuth();
+    // Opened from the password-reset link: show the sign-in page behind the "new password" form
+
+    if (viewFromParam === 'reset-password') {
+        this.currentUser = null;
+        this.updateUserNavigation();
+        this.openStandaloneAuth();
+        this.openResetForm(urlParams.get('token'));
     }
 
     // Run hold & past checker every 10 seconds
@@ -508,7 +517,9 @@ const App = {
     if (viewId === 'home-view') {
       this.updateHomeGreeting();
     } else if (viewId === 'booking-view') {
-      this.setupBookingStep(1);
+    if (!this.standaloneAuth) {
+        this.setupBookingStep(1);
+    }
     } else if (viewId === 'my-bookings-view') {
       this.renderMyBookings();
     } else if (viewId === 'booking-history-view') {
@@ -558,8 +569,8 @@ const App = {
 
   updateActiveBookingsBadge: function() {
     if (!this.currentUser) return;
-    const bookings = this.getBookings().filter(b => 
-      b.userId === this.currentUser.id && 
+    const bookings = this.getBookings().filter(b =>
+      b.userId === this.currentUser.id &&
       (b.bookingStatus === 'On Hold' || b.bookingStatus === 'Confirmed')
     );
     const badge = document.getElementById('myBookingsCountBadge');
@@ -585,7 +596,7 @@ const App = {
 
   getShiftCapacityInfo: function(dateStr, shiftId) {
     const bookings = this.getBookings();
-    const activeShiftBookings = bookings.filter(b => 
+    const activeShiftBookings = bookings.filter(b =>
       b.appointmentDate === dateStr &&
       b.shiftId === shiftId &&
       (b.bookingStatus === 'Confirmed' || b.bookingStatus === 'On Hold')
@@ -793,9 +804,14 @@ const App = {
       stepNumber = 3;
     }
     // A date and shift must be chosen before steps 3-5
-    if (stepNumber >= 3 && stepNumber <= 5 && (!this.bookingDraft.date || !this.bookingDraft.shiftId)) {
-      stepNumber = 2;
+    // (except the standalone Sign In page, which is not part of a booking)
+
+    const isStandaloneSignIn = (stepNumber === 3 && this.standaloneAuth);
+
+    if (!isStandaloneSignIn && stepNumber >= 3 && stepNumber <= 5 && (!this.bookingDraft.date || !this.bookingDraft.shiftId)) {
+        stepNumber = 2;
     }
+
     // A pet must be entered before the review step
     if (stepNumber === 5 && !this.bookingDraft.petName) {
       stepNumber = 4;
@@ -854,7 +870,7 @@ const App = {
   // STEP 1: SELECT SERVICES
   renderServiceSelectionStep: function() {
     const draft = this.bookingDraft;
-    
+
     // Toggle Booking Type Pill
     const pkgTab = document.getElementById('tabBookingPackage');
     const alaTab = document.getElementById('tabBookingAlaCarte');
@@ -1043,11 +1059,11 @@ const App = {
       const duration = addon.durations[size];
 
       html += `
-        <div class="item-checkbox-row ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}" 
-             ${!isDisabled ? `onclick="App.toggleAddon('${addon.id}')"` : ''} 
+        <div class="item-checkbox-row ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}"
+             ${!isDisabled ? `onclick="App.toggleAddon('${addon.id}')"` : ''}
              style="${isDisabled ? 'opacity:0.6; cursor:not-allowed;' : ''}">
           <div class="item-left">
-            <input type="checkbox" id="addon_${addon.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} 
+            <input type="checkbox" id="addon_${addon.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}
                    onclick="event.stopPropagation(); App.toggleAddon('${addon.id}')">
             <div>
               <div class="item-name">${addon.name} ${extraNote}</div>
@@ -1232,7 +1248,7 @@ const App = {
       }
 
       html += `
-        <div class="shift-card ${isSelected && !isFull ? 'selected' : ''} ${isFull ? 'disabled' : ''}" 
+        <div class="shift-card ${isSelected && !isFull ? 'selected' : ''} ${isFull ? 'disabled' : ''}"
              ${!isFull ? `onclick="App.selectShift('${shift.id}')"` : ''}>
           <div class="shift-card-header">
             <span class="shift-name">${shift.name}</span>
@@ -1278,16 +1294,19 @@ const App = {
     // STEP 3: AUTHENTICATION (Sign In / Register / Simulated OAuth)
   standaloneAuth: false,
 
-  // Sign In / Create Account on its own (not part of a booking)
-  openStandaloneAuth: function() {
-    if (this.currentUser) {
-      this.routeTo('my-bookings-view');
-      return;
-    }
-    this.routeTo('booking-view');
-    this.standaloneAuth = true;
-    this.setupBookingStep(3);
-  },
+    // Sign In / Create Account on its own (not part of a booking)
+    openStandaloneAuth: function() {
+        if (this.currentUser) {
+            this.routeTo('my-bookings-view');
+            return;
+        }
+
+        // Set standalone mode BEFORE opening the booking page
+        this.standaloneAuth = true;
+
+        this.routeTo('booking-view');
+        this.setupBookingStep(3);
+    },
 
   // After login/register: continue the booking, or go to My Bookings if standalone
   afterAuthSuccess: function() {
@@ -1310,7 +1329,7 @@ const App = {
     document.getElementById('authBackBtn').style.display = standalone ? 'none' : '';
     const stepperEl = document.querySelector('.stepper-wrapper');
     if (stepperEl) stepperEl.style.display = standalone ? 'none' : '';
-    this.switchAuthTab('login');
+    this.switchAuthTab(standalone ? 'login' : 'register');
   },
 
   switchAuthTab: function(tabName) {
@@ -1332,30 +1351,34 @@ const App = {
     }
   },
 
-    handleLogin: function(e) {
+      handleLogin: function(e) {
     if (e) e.preventDefault();
     const email = document.getElementById('loginEmailInput').value.trim();
     const password = document.getElementById('loginPasswordInput').value;
     const remember = document.getElementById('loginRememberMe')?.checked;
 
     const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+    const account = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
-    if (user) {
-      this.currentUser = user;
-      // Remember me: persist across browser restarts. Otherwise: this tab session only.
-      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-      sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-      if (remember) {
-        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
-      } else {
-        sessionStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
-      }
-      this.updateUserNavigation();
-      this.afterAuthSuccess();
-    } else {
-      alert('Invalid email or password. Please try again. (Demo account: capawlong@gmail.com / password123)');
+    // No account with this email: send them to Create Account
+    if (!account) {
+      alert('No account found for this email address. Please create an account first.');
+      this.switchAuthTab('register');
+      const regEmail = document.getElementById('regEmailInput');
+      if (regEmail) regEmail.value = email;
+      return;
     }
+
+    // Account exists, wrong password
+    if (account.password !== password) {
+      alert('Incorrect password. Please try again, or use "Forgot Password?".');
+      return;
+    }
+
+    this.currentUser = account;
+    saveCurrentUser(account, remember);
+    this.updateUserNavigation();
+    this.afterAuthSuccess();
   },
 
   handleRegister: function(e) {
@@ -1719,7 +1742,7 @@ const App = {
     document.getElementById('reviewPetBreed').textContent = draft.breed;
     document.getElementById('reviewPetWeight').textContent = `${draft.weight} kg (Category: ${calc.sizeCategory})`;
     document.getElementById('reviewPetNotes').textContent = draft.careNotes || 'None';
-    
+
     const photoEl = document.getElementById('reviewPetPhoto');
     if (photoEl && draft.petPhoto) {
       photoEl.src = draft.petPhoto;
@@ -1889,6 +1912,9 @@ const App = {
     const downCard = document.getElementById('payCardDown');
     const fullCard = document.getElementById('payCardFull');
 
+    const radio = document.querySelector(`input[name="payOptionRadio"][value="${option}"]`);
+    if (radio) radio.checked = true;
+
     if (option === 'down') {
       downCard.classList.add('selected');
       fullCard.classList.remove('selected');
@@ -1905,7 +1931,7 @@ const App = {
 
       const payAmount = (option === 'down') ? booking.downPaymentAmount : booking.totalAmount;
       document.getElementById('payAmountDueDisplay').textContent = `₱${payAmount.toLocaleString()}`;
-      
+
       // Update simulated QR Code SVG
       this.generateSimulatedQR(booking.referenceNumber, payAmount);
     }
@@ -1923,15 +1949,15 @@ const App = {
         <rect x="10" y="10" width="40" height="40" fill="#000" />
         <rect x="16" y="16" width="28" height="28" fill="#fff" />
         <rect x="22" y="22" width="16" height="16" fill="#000" />
-        
+
         <rect x="110" y="10" width="40" height="40" fill="#000" />
         <rect x="116" y="16" width="28" height="28" fill="#fff" />
         <rect x="122" y="22" width="16" height="16" fill="#000" />
-        
+
         <rect x="10" y="110" width="40" height="40" fill="#000" />
         <rect x="16" y="116" width="28" height="28" fill="#fff" />
         <rect x="22" y="122" width="16" height="16" fill="#000" />
-        
+
         <!-- Data Patterns -->
         <rect x="58" y="14" width="8" height="8" fill="#000" />
         <rect x="74" y="14" width="8" height="8" fill="#000" />
@@ -2093,7 +2119,7 @@ const App = {
     document.getElementById('confirmServicesDetails').textContent = servicesNames.join(', ');
     document.getElementById('confirmTotalAmount').textContent = `₱${booking.totalAmount.toLocaleString()}`;
     document.getElementById('confirmAmountPaid').textContent = `₱${booking.amountPaid.toLocaleString()} (${booking.paymentStatus})`;
-    
+
     const balanceRow = document.getElementById('confirmRemainingBalanceRow');
     const balanceVal = document.getElementById('confirmRemainingBalance');
     if (booking.remainingBalance > 0) {
@@ -2105,7 +2131,11 @@ const App = {
   },
 
   // RESET DRAFT AND START FRESH BOOKING
-  startNewBooking: function() {
+    startNewBooking: function() {
+    // Exit standalone sign-in mode
+    this.standaloneAuth = false;
+
+    // Reset booking draft
     this.bookingDraft = {
       bookingType: 'package',
       packageId: 'basic_grooming',
@@ -2129,8 +2159,11 @@ const App = {
       paymentOption: 'down',
       activeHoldBookingId: null
     };
+
+    // Start the normal booking process
     this.routeTo('booking-view');
-  },
+    this.setupBookingStep(1);
+},
 
   // MY BOOKINGS (Upcoming: On Hold & Confirmed)
   renderMyBookings: function() {
@@ -2143,8 +2176,8 @@ const App = {
     if (!container) return;
 
     const allBookings = this.getBookings();
-    const upcoming = allBookings.filter(b => 
-      b.userId === this.currentUser.id && 
+    const upcoming = allBookings.filter(b =>
+      b.userId === this.currentUser.id &&
       (b.bookingStatus === 'On Hold' || b.bookingStatus === 'Confirmed')
     );
 
@@ -2180,7 +2213,7 @@ const App = {
       const isOnHold = (b.bookingStatus === 'On Hold');
       const isConfirmed = (b.bookingStatus === 'Confirmed');
 
-      const servicesSummary = b.bookingType === 'package' 
+      const servicesSummary = b.bookingType === 'package'
         ? (SERVICE_DATA.packages[b.packageId] ? SERVICE_DATA.packages[b.packageId].name : 'Package')
         : (b.selectedServices.map(s => SERVICE_DATA.alaCarte[s] ? SERVICE_DATA.alaCarte[s].name : s).join(', '));
 
@@ -2208,12 +2241,12 @@ const App = {
 
           <div class="booking-card-body">
             <img src="${b.pet.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=100'}" class="booking-pet-thumb" alt="${b.pet.name}">
-            
+
             <div>
               <h4 style="margin-bottom:4px; font-size:1.1rem; color:var(--color-navy);">${b.pet.name} (${b.pet.species} • ${b.pet.breed})</h4>
               <p style="font-size:0.9rem; color:#444; margin-bottom:4px;"><strong>Services:</strong> ${servicesSummary}</p>
               <p style="font-size:0.85rem; color:#666;">
-                <strong>Total Amount:</strong> ₱${b.totalAmount.toLocaleString()} 
+                <strong>Total Amount:</strong> ₱${b.totalAmount.toLocaleString()}
                 ${b.discountAmount > 0 ? `<span style="color:var(--color-rose); font-weight:700;">(AWD 20% Applied)</span>` : ''}
               </p>
               ${isOnHold ? `
@@ -2265,8 +2298,8 @@ const App = {
     if (!container) return;
 
     const allBookings = this.getBookings();
-    let historyList = allBookings.filter(b => 
-      b.userId === this.currentUser.id && 
+    let historyList = allBookings.filter(b =>
+      b.userId === this.currentUser.id &&
       (b.bookingStatus === 'Past' || b.bookingStatus === 'Cancelled')
     );
 
@@ -2298,7 +2331,7 @@ const App = {
       }
 
       const isPast = (b.bookingStatus === 'Past');
-      const servicesSummary = b.bookingType === 'package' 
+      const servicesSummary = b.bookingType === 'package'
         ? (SERVICE_DATA.packages[b.packageId] ? SERVICE_DATA.packages[b.packageId].name : 'Package')
         : (b.selectedServices.map(s => SERVICE_DATA.alaCarte[s] ? SERVICE_DATA.alaCarte[s].name : s).join(', '));
 
@@ -2326,13 +2359,13 @@ const App = {
 
           <div class="booking-card-body">
             <img src="${b.pet.photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=100'}" class="booking-pet-thumb" alt="${b.pet.name}">
-            
+
             <div>
               <h4 style="margin-bottom:4px; font-size:1.1rem; color:var(--color-navy);">${b.pet.name} (${b.pet.species} • ${b.pet.breed})</h4>
               <p style="font-size:0.9rem; color:#444; margin-bottom:4px;"><strong>Services:</strong> ${servicesSummary}</p>
               <p style="font-size:0.85rem; color:#666;">
-                <strong>Total Amount:</strong> ₱${b.totalAmount.toLocaleString()} | 
-                <strong>Amount Paid:</strong> ₱${(b.amountPaid || 0).toLocaleString()} 
+                <strong>Total Amount:</strong> ₱${b.totalAmount.toLocaleString()} |
+                <strong>Amount Paid:</strong> ₱${(b.amountPaid || 0).toLocaleString()}
                 ${b.discountAmount > 0 ? `<span style="color:var(--color-rose);"> (20% AWD Discount Applied)</span>` : ''}
               </p>
               ${b.cancellationReason ? `
@@ -2352,7 +2385,7 @@ const App = {
   },
 
   // RESCHEDULE LOGIC (Strictly follows proposal page 34-35)
-  // "The system automatically checks the requested shift's remaining capacity before processing... 
+  // "The system automatically checks the requested shift's remaining capacity before processing...
   // The new appointment capacity must be successfully reserved before the original appointment slot is released to prevent overbooking.
   // Rescheduling does not initiate a new payment countdown or require the customer to pay again."
   rescheduleTargetBookingId: null,
@@ -2462,7 +2495,7 @@ const App = {
         <div class="alert alert-success" style="margin-bottom:0;">
           <div>
             <strong>✓ Full Simulated Refund Eligible (≥ 24 Hours Notice)</strong><br>
-            Cancellation is being made ${Math.floor(hoursDifference)} hours prior to the appointment. A full simulated refund of 
+            Cancellation is being made ${Math.floor(hoursDifference)} hours prior to the appointment. A full simulated refund of
             <strong>₱${(booking.amountPaid || 0).toLocaleString()}</strong> will be processed immediately.
           </div>
         </div>
@@ -2534,7 +2567,7 @@ const App = {
     const modal = document.getElementById('detailsModal');
     const content = document.getElementById('detailsModalContent');
 
-    const servicesSummary = booking.bookingType === 'package' 
+    const servicesSummary = booking.bookingType === 'package'
       ? (SERVICE_DATA.packages[booking.packageId] ? SERVICE_DATA.packages[booking.packageId].name : 'Package')
       : (booking.selectedServices.map(s => SERVICE_DATA.alaCarte[s] ? SERVICE_DATA.alaCarte[s].name : s).join(', '));
 
@@ -2855,12 +2888,138 @@ openEditPetModal: function(petId) {
     }
   },
 
-  // FORGOT PASSWORD SIMULATION
+
+  // FORGOT PASSWORD (demo): the "email" containing the reset link is shown on screen
+  RESET_TOKENS_KEY: 'fb_reset_tokens',
+  RESET_TOKEN_MINUTES: 15,
+
+  getResetTokens: function() {
+      return JSON.parse(localStorage.getItem(this.RESET_TOKENS_KEY) || '[]')
+          .filter(t => t.expiresAt > Date.now());
+  },
+
   handleForgotPassword: function() {
-    const email = prompt('Please enter your registered email address for password reset:');
-    if (email) {
-      alert(`Firebase Authentication simulated: A password-reset link has been sent to ${email}. Please check your inbox and follow the instructions to create a new password.`);
-    }
+      document.getElementById('forgotStepEmail').style.display = 'block';
+      document.getElementById('forgotStepReset').style.display = 'none';
+      document.getElementById('forgotError').style.display = 'none';
+      document.getElementById('forgotSimEmail').style.display = 'none';
+
+      document.getElementById('forgotEmailInput').value =
+          (document.getElementById('loginEmailInput') || {}).value || '';
+
+      document.getElementById('forgotModal').classList.add('show');
+  },
+
+  sendResetLink: function(e) {
+      if (e) e.preventDefault();
+
+      const email = document.getElementById('forgotEmailInput').value.trim();
+      const errEl = document.getElementById('forgotError');
+      const box = document.getElementById('forgotSimEmail');
+
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+      if (!user) {
+          box.style.display = 'none';
+          errEl.textContent = 'No account was found for that email address. Please check it or create an account.';
+          errEl.style.display = 'block';
+          return;
+      }
+
+      errEl.style.display = 'none';
+
+      const token = 'rst_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+
+      const tokens = this.getResetTokens().filter(t => t.email.toLowerCase() !== email.toLowerCase());
+
+      tokens.push({
+          token: token,
+          email: user.email,
+          expiresAt: Date.now() + this.RESET_TOKEN_MINUTES * 60 * 1000
+      });
+
+      localStorage.setItem(this.RESET_TOKENS_KEY, JSON.stringify(tokens));
+
+      const base = window.location.href.split('?')[0].split('#')[0];
+      const link = `${base}?view=reset-password&token=${token}`;
+
+      box.innerHTML = `
+          <span class="sim-email-label">SIMULATED EMAIL — shown here for the demo</span><br>
+          <strong>To:</strong> ${user.email}<br>
+          <strong>Subject:</strong> Reset your Fur &amp; Bubbles password<br><br>
+          Hi ${user.name.split(' ')[0]}, we received a request to reset your password.
+          This link expires in ${this.RESET_TOKEN_MINUTES} minutes.<br>
+          <a class="sim-reset-link" href="${link}" onclick="App.openResetForm('${token}'); return false;">Reset my password</a>
+      `;
+
+      box.style.display = 'block';
+  },
+
+  openResetForm: function(token) {
+      const entry = this.getResetTokens().find(t => t.token === token);
+
+      if (!entry) {
+          alert('This password-reset link is invalid or has expired. Please request a new one.');
+          return;
+      }
+
+      this.pendingResetToken = token;
+
+      document.getElementById('resetForEmailText').textContent = `Resetting the password for ${entry.email}`;
+      document.getElementById('resetNewPassword').value = '';
+      document.getElementById('resetConfirmPassword').value = '';
+      document.getElementById('resetError').style.display = 'none';
+
+      document.getElementById('forgotStepEmail').style.display = 'none';
+      document.getElementById('forgotStepReset').style.display = 'block';
+      document.getElementById('forgotModal').classList.add('show');
+  },
+
+  handleResetPassword: function(e) {
+      if (e) e.preventDefault();
+
+      const pw = document.getElementById('resetNewPassword').value;
+      const pw2 = document.getElementById('resetConfirmPassword').value;
+      const errEl = document.getElementById('resetError');
+
+      const showErr = (m) => {
+          errEl.textContent = m;
+          errEl.style.display = 'block';
+      };
+
+      if (pw.length < 6) return showErr('Password must be at least 6 characters.');
+      if (pw !== pw2) return showErr('Passwords do not match.');
+
+      const entry = this.getResetTokens().find(t => t.token === this.pendingResetToken);
+      if (!entry) return showErr('This reset link has expired. Please request a new one.');
+
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const idx = users.findIndex(u => u.email.toLowerCase() === entry.email.toLowerCase());
+
+      if (idx === -1) return showErr('Account not found.');
+
+      users[idx].password = pw;
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+
+      localStorage.setItem(this.RESET_TOKENS_KEY,
+          JSON.stringify(this.getResetTokens().filter(t => t.token !== entry.token)));
+
+      this.pendingResetToken = null;
+
+      document.getElementById('forgotModal').classList.remove('show');
+
+      alert('Your password has been changed. Please sign in with your new password.');
+
+      if (window.location.search.includes('reset-password')) {
+          window.history.replaceState({}, '', window.location.pathname + '?view=sign-in');
+      }
+
+      this.openStandaloneAuth();
+      this.switchAuthTab(standalone ? 'login' : 'register');
+
+      const loginEmail = document.getElementById('loginEmailInput');
+      if (loginEmail) loginEmail.value = entry.email;
   },
 
   // EVENT LISTENERS INITIALIZATION
