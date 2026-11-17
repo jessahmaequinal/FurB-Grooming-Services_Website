@@ -630,6 +630,7 @@ const App = {
           b.bookingStatus = 'Cancelled';
           b.paymentStatus = 'Unpaid';
           b.cancellationReason = 'Expired 15-minute hold deadline';
+          this.addBookingEvent(b, 'Hold expired', 'The 15-minute payment deadline passed. Booking cancelled and slot released.');    
           updated = true;
           // If this was our current active hold, stop timer
           if (App.bookingDraft.activeHoldBookingId === b.id) {
@@ -641,6 +642,7 @@ const App = {
     });
 
     if (updated) {
+      this.addBookingEvent(booking, 'Cancelled', booking.cancellationReason);
       this.saveBookings(bookings);
       if (this.currentView === 'my-bookings-view') {
         this.renderMyBookings();
@@ -1322,13 +1324,15 @@ const App = {
 
   renderAuthStep: function() {
     const standalone = this.standaloneAuth;
-    document.getElementById('authStepTitle').textContent = standalone ? 'Sign In / Create Account' : 'Step 3: Customer Sign In / Register';
+    document.getElementById('authStepTitle').textContent = standalone ? 'Sign In' : 'Step 3: Create Your Account';
     document.getElementById('authStepSubtitle').textContent = standalone
       ? 'Access your bookings, saved pets, and account details.'
       : 'Your selected services, date, and shift are securely saved.';
     document.getElementById('authBackBtn').style.display = standalone ? 'none' : '';
     const stepperEl = document.querySelector('.stepper-wrapper');
     if (stepperEl) stepperEl.style.display = standalone ? 'none' : '';
+    const tabs = document.getElementById('authTabsContainer');
+    if (tabs) tabs.style.display = 'none';
     this.switchAuthTab(standalone ? 'login' : 'register');
   },
 
@@ -1362,6 +1366,10 @@ const App = {
 
     // No account with this email: send them to Create Account
     if (!account) {
+      if (this.standaloneAuth) {
+        alert('No account found for this email address. To create an account, click Book Now and register during booking.');
+        return;
+      }
       alert('No account found for this email address. Please create an account first.');
       this.switchAuthTab('register');
       const regEmail = document.getElementById('regEmailInput');
@@ -1402,7 +1410,7 @@ const App = {
 
     const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-      alert('This email address is already registered. Please sign in instead.');
+      alert('This email address is already registered. Please use the Sign In button at the top of the page.');
       return;
     }
 
@@ -1425,42 +1433,32 @@ const App = {
     this.afterAuthSuccess();
   },
 
-  // SIMULATED GOOGLE / APPLE SIGN-IN
+    // SIMULATED GOOGLE / APPLE SIGN-IN (customer enters their own details)
   simulatedOAuth: function(provider) {
-    const modal = document.getElementById('oauthModal');
-    const modalTitle = document.getElementById('oauthModalTitle');
-    const modalList = document.getElementById('oauthAccountList');
+    const isGoogle = (provider === 'Google');
+    document.getElementById('oauthModalTitle').textContent = `Continue with ${provider}`;
+    document.getElementById('oauthAccountList').innerHTML = `
+      <div class="form-group">
+        <label class="form-label" for="oauthNameInput">Full Name</label>
+        <input type="text" id="oauthNameInput" class="form-input" placeholder="Juan Dela Cruz">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="oauthEmailInput">${isGoogle ? 'Google Account (Email)' : 'Apple ID (Email)'}</label>
+        <input type="email" id="oauthEmailInput" class="form-input" placeholder="${isGoogle ? 'name@gmail.com' : 'name@icloud.com'}">
+      </div>
+      <button type="button" class="btn btn-primary" style="width:100%;" onclick="App.submitOAuthForm()">Continue</button>
+    `;
+    document.getElementById('oauthModal').classList.add('show');
+  },
 
-    modalTitle.textContent = `Continue with ${provider}`;
-    if (provider === 'Google') {
-      modalList.innerHTML = `
-        <div style="border:1px solid #ddd; border-radius:8px; padding:12px; margin-bottom:10px; cursor:pointer; display:flex; align-items:center; gap:12px;" onclick="App.completeOAuth('Mike Anthony Capulong', 'capawlong@gmail.com')">
-          <div style="width:36px; height:36px; border-radius:50%; background:#4285F4; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">M</div>
-          <div>
-            <strong>Mike Anthony Capulong</strong><br>
-            <small style="color:#666;">capawlong@gmail.com</small>
-          </div>
-        </div>
-        <div style="border:1px solid #ddd; border-radius:8px; padding:12px; cursor:pointer; display:flex; align-items:center; gap:12px;" onclick="App.completeOAuth('Jenna Paulene Abulencia', 'jenna.abulencia@gmail.com')">
-          <div style="width:36px; height:36px; border-radius:50%; background:#34A853; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">J</div>
-          <div>
-            <strong>Jenna Paulene Abulencia</strong><br>
-            <small style="color:#666;">jenna.abulencia@gmail.com</small>
-          </div>
-        </div>
-      `;
-    } else {
-      modalList.innerHTML = `
-        <div style="border:1px solid #ddd; border-radius:8px; padding:12px; cursor:pointer; display:flex; align-items:center; gap:12px;" onclick="App.completeOAuth('Mike Anthony Capulong', 'capulong.mike@icloud.com')">
-          <div style="width:36px; height:36px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">🍎</div>
-          <div>
-            <strong>Sign in with Apple ID</strong><br>
-            <small style="color:#666;">capulong.mike@icloud.com</small>
-          </div>
-        </div>
-      `;
+  submitOAuthForm: function() {
+    const name = document.getElementById('oauthNameInput').value.trim();
+    const email = document.getElementById('oauthEmailInput').value.trim();
+    if (!name || !/^\S+@\S+\.\S+$/.test(email)) {
+      alert('Please enter your full name and a valid email address.');
+      return;
     }
-    modal.classList.add('show');
+    this.completeOAuth(name, email);
   },
 
   completeOAuth: function(name, email) {
@@ -1874,6 +1872,8 @@ const App = {
       paymentRecordedAt: null
     };
 
+    this.addBookingEvent(newBooking, 'Booked', `Slot reserved (On Hold): ${formatDateReadable(draft.date)} - ${shift.name}. Pay within 15 minutes.`);
+
     // Save booking into list with 'On Hold' status
     const bookings = this.getBookings();
     bookings.push(newBooking);
@@ -2041,6 +2041,7 @@ const App = {
         booking.bookingStatus = 'Cancelled';
         booking.paymentStatus = 'Unpaid';
         booking.cancellationReason = 'Cancelled by customer during payment hold';
+        this.addBookingEvent(booking, 'Cancelled', 'Cancelled by the customer during the payment hold. Slot released.');    
         this.saveBookings(bookings);
       }
       this.stopHoldTimer();
@@ -2084,6 +2085,7 @@ const App = {
     booking.paymentTransactionRef = 'SIM-TXN-' + Math.floor(100000 + Math.random() * 900000);
     booking.paymentDeadline = null; // Clear hold deadline
 
+    this.addBookingEvent(booking, 'Payment recorded', `${isDown ? '20% down payment' : 'Full payment'} of ₱${amountPaid.toLocaleString()} (${paymentStatus}). Booking confirmed.`);
     this.saveBookings(bookings);
 
     // Proceed to Step 7 (Confirmation Screen)
@@ -2390,7 +2392,32 @@ const App = {
   // Rescheduling does not initiate a new payment countdown or require the customer to pay again."
   rescheduleTargetBookingId: null,
 
-  openRescheduleModal: function(bookingId) {
+    // A date is available if at least one shift on it still has room
+  isDateAvailableForReschedule: function(date) {
+    const dateStr = getFormattedDateStr(date);
+    return SERVICE_DATA.shifts.some(s => !this.getShiftCapacityInfo(dateStr, s.id).isFull);
+  },
+
+  initReschedulePicker: function() {
+    const input = document.getElementById('rescheduleNewDateInput');
+    if (!input || typeof flatpickr === 'undefined') return;
+    if (this.reschedulePicker) this.reschedulePicker.destroy();
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    this.reschedulePicker = flatpickr(input, {
+      dateFormat: 'Y-m-d',
+      minDate: tomorrow,
+      static: true,
+      disableMobile: true,
+      disable: [ (date) => !App.isDateAvailableForReschedule(date) ],
+      onChange: () => App.updateRescheduleShifts()
+    });
+    this.reschedulePicker.clear(false);
+  },
+
+    openRescheduleModal: function(bookingId) {
     this.rescheduleTargetBookingId = bookingId;
     const bookings = this.getBookings();
     const booking = bookings.find(b => b.id === bookingId);
@@ -2399,14 +2426,10 @@ const App = {
     document.getElementById('rescheduleRefText').textContent = `Ref #${booking.referenceNumber}`;
     document.getElementById('rescheduleCurrentDateShift').textContent = `${formatDateReadable(booking.appointmentDate)} - ${booking.shiftName}`;
 
-    // Default to tomorrow or booking date
-    const dateInput = document.getElementById('rescheduleNewDateInput');
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.value = getFormattedDateStr(tomorrow);
-    dateInput.min = getFormattedDateStr(tomorrow);
+    // Start empty: the customer picks from the available dates only
+    document.getElementById('rescheduleShiftSelect').innerHTML = '<option value="">Select a date first</option>';
+    this.initReschedulePicker();
 
-    this.updateRescheduleShifts();
     document.getElementById('rescheduleModal').classList.add('show');
   },
 
@@ -2454,11 +2477,14 @@ const App = {
 
     // Reserve new slot before releasing old slot
     const shift = SERVICE_DATA.shifts.find(s => s.id === shiftId);
+    const oldSlot = `${formatDateReadable(booking.appointmentDate)} - ${booking.shiftName}`;
     booking.appointmentDate = dateStr;
     booking.shiftId = shift.id;
     booking.shiftName = shift.name;
     booking.shiftTime = shift.time;
     booking.rescheduledAt = new Date().toISOString();
+
+    this.addBookingEvent(booking, 'Rescheduled', `${oldSlot} → ${formatDateReadable(dateStr)} - ${shift.name}`);
 
     this.saveBookings(bookings);
     document.getElementById('rescheduleModal').classList.remove('show');
@@ -2552,6 +2578,7 @@ const App = {
         booking.bookingStatus = 'Cancelled';
         booking.paymentStatus = 'Unpaid';
         booking.cancellationReason = 'Cancelled by customer';
+        this.addBookingEvent(booking, 'Cancelled', 'On Hold booking cancelled by the customer. Slot released.');      
         this.saveBookings(bookings);
       }
       this.renderMyBookings();
@@ -2626,11 +2653,16 @@ const App = {
             <span>₱${booking.remainingBalance.toLocaleString()} (Pay at shop before grooming)</span>
           </div>
         ` : ''}
-        ${booking.paymentTransactionRef ? `
+                ${booking.paymentTransactionRef ? `
           <div style="font-size:0.8rem; color:#777; margin-top:8px;">
             Transaction Ref: ${booking.paymentTransactionRef} • Recorded at ${new Date(booking.paymentRecordedAt).toLocaleString()}
           </div>
         ` : ''}
+      </div>
+
+      <div style="margin-top:18px; border-top:1px solid #ddd; padding-top:12px;">
+        <h5 style="color:var(--color-navy); margin-bottom:10px;">Activity Log</h5>
+        ${this.renderActivityLogHtml(booking)}
       </div>
     `;
 
@@ -2759,7 +2791,7 @@ openEditPetModal: function(petId) {
   preview.src = this.tempModalPetPhoto;
   preview.style.display = this.tempModalPetPhoto ? 'block' : 'none';
   document.getElementById('addPetModal').classList.add('show');
-},
+  },
 
   handleModalPetPhotoUpload: function(event) {
     const file = event.target.files[0];
@@ -2991,6 +3023,9 @@ openEditPetModal: function(petId) {
       if (pw.length < 6) return showErr('Password must be at least 6 characters.');
       if (pw !== pw2) return showErr('Passwords do not match.');
 
+      const confirmPw = document.getElementById('resetConfirmPassword').value;
+      if (pw !== confirmPw) return showErr('Passwords do not match.');
+
       const entry = this.getResetTokens().find(t => t.token === this.pendingResetToken);
       if (!entry) return showErr('This reset link has expired. Please request a new one.');
 
@@ -3016,10 +3051,40 @@ openEditPetModal: function(petId) {
       }
 
       this.openStandaloneAuth();
-      this.switchAuthTab(standalone ? 'login' : 'register');
 
       const loginEmail = document.getElementById('loginEmailInput');
       if (loginEmail) loginEmail.value = entry.email;
+  },
+
+    addBookingEvent: function(booking, type, details) {
+    if (!booking.activityLog) booking.activityLog = [];
+    booking.activityLog.push({ type: type, details: details || '', at: new Date().toISOString() });
+  },
+
+    renderActivityLogHtml: function(booking) {
+    let log = (booking.activityLog || []).slice();
+
+    // Older bookings: rebuild basic entries from existing fields
+    if (log.length === 0) {
+      if (booking.createdAt) log.push({ type: 'Booked', details: 'Booking created.', at: booking.createdAt });
+      if (booking.paymentRecordedAt) log.push({ type: 'Payment recorded', details: `₱${(booking.amountPaid || 0).toLocaleString()} (${booking.paymentStatus})`, at: booking.paymentRecordedAt });
+      if (booking.cancelledAt) log.push({ type: 'Cancelled', details: booking.cancellationReason || '', at: booking.cancelledAt });
+    }
+
+    if (log.length === 0) {
+      return '<p style="font-size:0.85rem; color:#777;">No recorded activity.</p>';
+    }
+
+    log.sort((a, b) => new Date(a.at) - new Date(b.at));
+
+    return `<div style="border-left:3px solid var(--color-border); margin-left:6px; padding-left:14px;">` +
+      log.map(e => `
+        <div style="margin-bottom:12px;">
+          <div style="font-weight:800; color:var(--color-navy);">${e.type}</div>
+          <div style="font-size:0.85rem; color:#444;">${e.details}</div>
+          <div style="font-size:0.78rem; color:#888;">${new Date(e.at).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+        </div>`).join('') +
+      `</div>`;
   },
 
   // EVENT LISTENERS INITIALIZATION

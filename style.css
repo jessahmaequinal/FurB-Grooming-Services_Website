@@ -2400,3 +2400,42 @@ a:hover {
     font-weight: 800;
     text-decoration: none;
 }
+
+/* Google / Apple sign-in popup: stack the title and subtitle */
+#oauthModal .modal-header {
+  display: block !important;
+  padding-right: 36px;
+  margin-bottom: 18px;
+}
+
+#oauthModal .modal-header h3 {
+  margin: 0 0 6px;
+  font-size: 1.4rem;
+  line-height: 1.25;
+}
+
+#oauthModal .modal-header p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.modal-overlay .modal-header {
+  display: block !important;
+  padding-right: 36px;
+  margin-bottom: 18px;
+}
+
+.modal-overlay .modal-header h3 {
+  margin: 0 0 6px;
+  line-height: 1.25;
+}
+
+.modal-overlay .modal-header p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.flatpickr-calendar { z-index: 10000 !important; }
+.flatpickr-day.flatpickr-disabled { text-decoration: line-through; opacity: 0.4; }
