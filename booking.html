@@ -512,6 +512,7 @@
             <h2>Step 5: Review Booking Details</h2>
             <p style="color:var(--color-text-muted);">Please review your appointment summary before proceeding to payment.</p>
           </div>
+            <button class="btn btn-outline btn-sm" onclick="App.setupBookingStep(4)">← Back to Pet Form</button>
         </div>
 
         <div class="review-summary-card">
@@ -610,8 +611,7 @@
           </p>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <button class="btn btn-outline" onclick="App.setupBookingStep(4)">← Back to Pet Form</button>
+        <div style="display:flex; justify-content:flex-end; align-items:center;">
           <button class="btn btn-primary btn-lg" onclick="App.submitBookingAndOpenPayment()">
             Submit &amp; Pay (Reserve Capacity) ➔
           </button>
