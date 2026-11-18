@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Cat">
+  <!-- tail -->
+  <path d="M56 168 C20 170 12 128 40 112" fill="none" stroke="#5E7390" stroke-width="12" stroke-linecap="round"/>
+  <!-- body -->
+  <path d="M96 100 C128 100 144 132 138 190 L60 190 C48 150 62 104 96 100 Z" fill="#7A91AD"/>
+  <!-- belly -->
+  <path d="M100 130 C118 134 126 160 122 190 L98 190 C92 168 92 146 100 130 Z" fill="#DCE6F2"/>
+  <!-- hind foot + front paws -->
+  <ellipse cx="72" cy="187" rx="22" ry="9" fill="#5E7390"/>
+  <ellipse cx="104" cy="189" rx="13" ry="7" fill="#DCE6F2"/>
+  <ellipse cx="124" cy="189" rx="13" ry="7" fill="#DCE6F2"/>
+  <!-- ears -->
+  <path d="M92 58 L94 22 L120 44 Z" fill="#7A91AD"/>
+  <path d="M120 44 L146 22 L150 58 Z" fill="#7A91AD"/>
+  <path d="M97 48 L98 33 L110 44 Z" fill="#F4B6C2"/>
+  <path d="M130 44 L142 33 L143 48 Z" fill="#F4B6C2"/>
+  <!-- head -->
+  <ellipse cx="121" cy="78" rx="33" ry="29" fill="#7A91AD"/>
+  <!-- eyes -->
+  <ellipse cx="108" cy="76" rx="6" ry="8" fill="#FCB34F"/>
+  <ellipse cx="134" cy="76" rx="6" ry="8" fill="#FCB34F"/>
+  <ellipse cx="108" cy="76" rx="2.4" ry="6" fill="#2B2B2B"/>
+  <ellipse cx="134" cy="76" rx="2.4" ry="6" fill="#2B2B2B"/>
+  <!-- nose + mouth -->
+  <path d="M117 88 L125 88 L121 93 Z" fill="#E8758A"/>
+  <path d="M121 93 C121 99 114 100 111 97 M121 93 C121 99 128 100 131 97" fill="none" stroke="#2B2B2B" stroke-width="2" stroke-linecap="round"/>
+  <!-- whiskers -->
+  <path d="M96 90 L74 86 M96 96 L74 98 M146 90 L168 86 M146 96 L168 98" stroke="#DCE6F2" stroke-width="2" stroke-linecap="round"/>
+</svg>

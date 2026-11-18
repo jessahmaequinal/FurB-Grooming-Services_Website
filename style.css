@@ -2437,5 +2437,70 @@ a:hover {
   color: #666;
 }
 
+/* ===== Booking History: Filter & Sort By dropdowns ===== */
+#booking-history-view .step-header select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 12px;
+  padding: 6px 36px 6px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+#booking-history-view .step-header label {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ===== Size guide (services page) ===== */
+.size-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.size-box {
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid transparent;
+}
+.size-title { font-weight: 800; font-size: 1.1rem; }
+.size-range { font-size: 0.85rem; font-weight: 700; color: #6b7280; margin-bottom: 12px; }
+.size-pets { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.size-pet-card {
+  margin: 0;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 6px;
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.size-pet-card img { height: auto; max-width: 100%; }
+.size-pet-card figcaption { font-size: 0.8rem; font-weight: 700; color: #4b5563; }
+
+.size-small  img { width: 42px; }
+.size-medium img { width: 56px; }
+.size-large  img { width: 72px; }
+.size-giant  img { width: 90px; }
+
+.size-small  { background: #e3f2fd; border-color: #bbdefb; }
+.size-small  .size-title { color: #1e7bf0; }
+.size-medium { background: #e6f4e8; border-color: #c8e6c9; }
+.size-medium .size-title { color: #2e7d32; }
+.size-large  { background: #fff0dc; border-color: #ffe0b2; }
+.size-large  .size-title { color: #e65100; }
+.size-giant  { background: #fce4ec; border-color: #f8bbd0; }
+.size-giant  .size-title { color: #d32f2f; }
+
 .flatpickr-calendar { z-index: 10000 !important; }
 .flatpickr-day.flatpickr-disabled { text-decoration: line-through; opacity: 0.4; }

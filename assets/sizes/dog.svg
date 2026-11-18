@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Dog">
+  <!-- tail -->
+  <path d="M50 150 C26 142 20 116 34 98" fill="none" stroke="#E0952F" stroke-width="11" stroke-linecap="round"/>
+  <!-- body -->
+  <path d="M96 92 L130 104 C142 128 140 160 132 190 L66 190 C44 188 40 160 52 132 C60 108 78 94 96 92 Z" fill="#F2B04A"/>
+  <!-- hind foot -->
+  <ellipse cx="72" cy="187" rx="24" ry="9" fill="#E0952F"/>
+  <!-- front leg -->
+  <rect x="108" y="150" width="22" height="40" rx="11" fill="#F2B04A"/>
+  <ellipse cx="121" cy="189" rx="15" ry="7" fill="#E0952F"/>
+  <!-- chest patch -->
+  <path d="M104 118 C116 122 124 136 122 152 L104 152 C98 140 98 128 104 118 Z" fill="#FBE3B8"/>
+  <!-- head -->
+  <ellipse cx="124" cy="72" rx="31" ry="28" fill="#F2B04A"/>
+  <!-- snout -->
+  <ellipse cx="152" cy="86" rx="19" ry="14" fill="#FBE3B8"/>
+  <!-- ear -->
+  <path d="M100 54 C84 52 78 76 88 96 C102 94 108 76 108 62 Z" fill="#C97A1E"/>
+  <!-- eye + nose -->
+  <circle cx="132" cy="68" r="4.5" fill="#2B2B2B"/>
+  <ellipse cx="167" cy="80" rx="6" ry="5" fill="#2B2B2B"/>
+  <!-- mouth -->
+  <path d="M148 94 C154 98 162 97 166 92" fill="none" stroke="#2B2B2B" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- collar -->
+  <path d="M100 100 C112 110 126 108 134 98" fill="none" stroke="#E62A34" stroke-width="7" stroke-linecap="round"/>
+</svg>

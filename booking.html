@@ -771,7 +771,6 @@
             <option value="soonest">Soonest First</option>
             <option value="latest">Latest First</option>
           </select>
-          <button class="btn btn-primary btn-sm" onclick="App.startNewBooking()">+ New Booking</button>
         </div>
       </div>
 
@@ -782,26 +781,17 @@
 
     <!-- 3. BOOKING HISTORY VIEW (Past & Cancelled) -->
     <section id="booking-history-view" class="view-section">
-      <div class="step-header">
+            <div class="step-header" style="display:flex; flex-direction:row; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px;">
         <div>
           <h2>Booking History</h2>
-          <p style="color:var(--color-text-muted);">View records of past completed and cancelled grooming appointments.</p>
+          <p style="color:var(--color-text-muted);">
+            View records of past completed and cancelled grooming appointments.
+          </p>
         </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <label style="font-size:0.85rem; font-weight:700;">Sort By:</label>
-          <select id="historySortOrderSelect"
-            class="form-select"
-            style="width:auto; min-width:160px; padding:6px 36px 6px 12px;"
-            onchange="App.renderBookingHistory()">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
-        </div>
-      </div>
 
-      <div id="bookingHistoryListContainer">
-        <!-- Rendered by JS -->
+        <div id="historyControlsContainer"></div>
       </div>
+       <div id="bookingHistoryListContainer"></div>
     </section>
 
     <!-- 4. MANAGE CUSTOMER ACCOUNT VIEW -->
@@ -840,6 +830,73 @@
             <label class="form-label" for="profileBirthdateInput">Birthdate</label>
             <input type="date" id="profileBirthdateInput" class="form-input">
           </div>
+
+          <!-- CHANGE PASSWORD SECTION -->
+          <div class="form-group" style="margin-top:24px;">
+            <label class="form-label">Change Password</label>
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              onclick="App.toggleChangePasswordForm()"
+              style="width:100%;"
+            >
+              Change Password
+            </button>
+          </div>
+
+          <!-- CHANGE PASSWORD FORM -->
+          <div id="changePasswordForm" style="display:none; margin-top:16px;">
+
+            <div class="form-group">
+              <label class="form-label" for="currentPasswordInput">Current Password</label>
+              <input
+                type="password"
+                id="currentPasswordInput"
+                class="form-input"
+                placeholder="Enter current password"
+                autocomplete="current-password"
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="newPasswordInput">New Password</label>
+              <input
+                type="password"
+                id="newPasswordInput"
+                class="form-input"
+                placeholder="Enter new password"
+                autocomplete="new-password"
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="confirmNewPasswordInput">Confirm Password</label>
+              <input
+                type="password"
+                id="confirmNewPasswordInput"
+                class="form-input"
+                placeholder="Confirm new password"
+                autocomplete="new-password"
+              >
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="App.saveNewPassword()"
+              style="width:100%;"
+            >
+              Save New Password
+            </button>
+
+            <p
+              id="changePasswordMessage"
+              style="display:none; color:green; margin-top:12px; font-weight:600;"
+            ></p>
+
+          </div>
+
           <div style="display:flex; gap:12px; margin-top:24px;">
             <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
             <button type="button" class="btn btn-outline" onclick="App.routeTo('pets-view')">🐾 View My Pets</button>
