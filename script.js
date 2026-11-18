@@ -1098,6 +1098,65 @@ const App = {
     this.renderShiftsList();
   },
 
+    // Allowed birthdates: age 19 to 45
+  getBirthRange: function() {
+    const max = new Date(); max.setFullYear(max.getFullYear() - 19);                 // newest allowed (turns 19 today)
+    const min = new Date(); min.setFullYear(min.getFullYear() - 46); min.setDate(min.getDate() + 1); // oldest allowed (still 45)
+    return { min, max };
+  },
+
+  isValidAge: function(birthdate) {
+    if (!birthdate) return false;
+    const { min, max } = this.getBirthRange();
+    min.setHours(0, 0, 0, 0);
+    max.setHours(23, 59, 59, 999);
+    const b = new Date(birthdate + 'T00:00:00');
+    return b >= min && b <= max;
+  },
+
+    initBirthdatePickers: function() {
+    if (typeof flatpickr === 'undefined') return;
+    const { min, max } = this.getBirthRange();
+    const thisYear = new Date().getFullYear();
+    const minYear = thisYear - 45;   // 2026 - 45 = 1981 (oldest year shown)
+    const maxYear = thisYear - 19;   // 2026 - 19 = 2007 (newest year shown)
+
+    // Swap the number box for a year dropdown
+    const buildYearSelect = (dates, str, instance) => {
+      const wrap = instance.calendarContainer.querySelector('.flatpickr-current-month .numInputWrapper');
+      if (!wrap || instance._yearSelect) return;
+      const sel = document.createElement('select');
+      sel.className = 'fp-year-select';
+      for (let y = maxYear; y >= minYear; y--) sel.add(new Option(y, y));
+      sel.value = instance.currentYear;
+      sel.addEventListener('change', () => instance.changeYear(parseInt(sel.value, 10)));
+      wrap.style.display = 'none';
+      wrap.parentNode.insertBefore(sel, wrap);
+      instance._yearSelect = sel;
+    };
+    const syncYear = (dates, str, instance) => {
+      if (instance._yearSelect) instance._yearSelect.value = instance.currentYear;
+    };
+
+    ['regBirthdateInput', 'profileBirthdateInput'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      flatpickr(el, {
+        dateFormat: 'Y-m-d',
+        minDate: new Date(minYear, 0, 1),     // whole years are shown;
+        maxDate: new Date(maxYear, 11, 31),   // exact age is checked on submit
+        disableMobile: true,
+        onReady: buildYearSelect,
+        onOpen: (dates, str, instance) => {
+          if (!dates.length) instance.jumpToDate(new Date(2000, 0, 1)); // open around 2000
+          syncYear(dates, str, instance);
+        },
+        onYearChange: syncYear,
+        onMonthChange: syncYear
+      });
+    });
+  },
+  
     // True if the shift has already started today
   isShiftPassed: function(dateStr, shift) {
     const now = new Date();
@@ -1299,6 +1358,11 @@ const App = {
     const birthdate = document.getElementById('regBirthdateInput').value;
     const phone = document.getElementById('regPhoneInput').value.trim();
     const agree = document.getElementById('regAgreeCheckbox').checked;
+
+    if (!this.isValidAge(birthdate)) {
+      alert('You must be between 19 and 45 years old to register.');
+      return;
+    }
 
     if (!agree) {
       alert('Please agree to the Terms and Conditions and Privacy Policy.');
@@ -1714,9 +1778,58 @@ const App = {
     document.getElementById('reviewRemainingBalanceAmount').textContent = `₱${calc.remainingBalance.toLocaleString()}`;
   },
 
+    // Minimum days between appointments for the SAME pet, based on the package chosen
+  getRebookingInterval: function(info) {
+    const HAIRCUT = ['full_grooming', 'premium_grooming', 'spa_grooming'];
+    if (info.bookingType === 'package' && HAIRCUT.includes(info.packageId)) return 28; // 4 weeks
+    return 14; // Basic, De-Shedding, Puppy (and à la carte): 2 weeks minimum
+  },
+
+  isSamePet: function(b, info) {
+    if (!this.currentUser || b.userId !== this.currentUser.id) return false;
+    if (info.petId && b.petId) return b.petId === info.petId;
+    const n = s => (s || '').trim().toLowerCase();
+    return n(b.pet.name) === n(info.petName) &&
+           n(b.pet.species) === n(info.species) &&
+           n(b.pet.breed) === n(info.breed);
+  },
+
+  // Returns an error message, or null if the date is allowed
+  checkRebookingRule: function(info, dateStr, excludeId) {
+    const days = this.getRebookingInterval(info);
+    const DAY = 86400000;
+    const target = new Date(dateStr + 'T00:00:00');
+    const addDays = (d, n) => getFormattedDateStr(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n));
+
+    const others = this.getBookings().filter(b =>
+      b.id !== excludeId &&
+      ['On Hold', 'Confirmed', 'Past'].includes(b.bookingStatus) &&
+      this.isSamePet(b, info));
+
+    for (const b of others) {
+      const d = new Date(b.appointmentDate + 'T00:00:00');
+      const gap = Math.abs(Math.round((target - d) / DAY));
+      if (gap < days) {
+        const suggestion = target >= d
+          ? `on or after ${formatDateReadable(addDays(d, days))}`
+          : `on or before ${formatDateReadable(addDays(d, -days))}`;
+        return `${info.petName} already has an appointment on ${formatDateReadable(b.appointmentDate)}.\n\n` +
+               `For this package, appointments for the same pet must be at least ${days} days (${days / 7} weeks) apart.\n` +
+               `Please choose a date ${suggestion}.`;
+      }
+    }
+    return null;
+  },
+
   // STEP 6: SUBMIT & PAY (15-Minute Countdown & Simulated QR)
   submitBookingAndOpenPayment: function() {
     const draft = this.bookingDraft;
+    const ruleMsg = this.checkRebookingRule(draft, draft.date);
+    if (ruleMsg) {
+      alert(ruleMsg);
+      this.setupBookingStep(2);   // back to the calendar to pick another date
+      return;
+    }
     const confirmBox = document.getElementById('reviewConfirmAccurate');
     if (confirmBox && !confirmBox.checked) {
       alert('Please tick the box to confirm that your booking details are accurate before submitting.');
@@ -2163,8 +2276,12 @@ const App = {
                 </p>
               ` : b.remainingBalance > 0 ? `
                 <p style="font-size:0.9rem; color:var(--color-inferno); font-weight:800; margin-top:4px;">
-                  ⚠️ Remaining Balance: ₱${b.remainingBalance.toLocaleString()} (Pay in cash at shop before grooming)
+                  ⚠️ Remaining Balance: ₱${b.remainingBalance.toLocaleString()}
                 </p>
+                <p style="font-size:0.8rem; color:#555; margin:2px 0 8px;">
+                  Pay online now, or pay in cash at the shop before grooming.
+                </p>
+                <button class="btn btn-primary btn-sm" onclick="App.openBalancePaymentModal('${b.id}')">💳 Pay Balance Online</button>
               ` : `
                 <p style="font-size:0.85rem; color:var(--color-forest); font-weight:700; margin-top:4px;">
                   ✓ Fully Paid online
@@ -2195,6 +2312,61 @@ const App = {
     this.setupBookingStep(6);
   },
 
+  openBalancePaymentModal: function(bookingId) {
+    const bookings = JSON.parse(localStorage.getItem(STORAGE_KEYS.BOOKINGS) || '[]');
+    const booking = bookings.find(x => String(x.id) === String(bookingId));
+    if (!booking) {
+      console.error('Booking not found:', bookingId);
+      return;
+    }
+
+    let modal = document.getElementById('balancePaymentModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'balancePaymentModal';
+      modal.style.cssText =
+        'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div style="background:#fff;padding:24px;border-radius:12px;max-width:420px;width:90%;">
+        <h3 style="margin-bottom:8px;">Pay Remaining Balance</h3>
+        <p style="margin:4px 0;">Total: ₱${(booking.totalAmount || 0).toLocaleString()}</p>
+        <p style="margin:4px 0;">Already paid: ₱${(booking.amountPaid || 0).toLocaleString()}</p>
+        <p style="margin:8px 0;font-size:1.1rem;">Amount due now: <strong>₱${(booking.remainingBalance || 0).toLocaleString()}</strong></p>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-primary" onclick="App.confirmBalancePayment('${booking.id}')">Confirm Payment</button>
+          <button class="btn" onclick="App.closeBalancePaymentModal()">Cancel</button>
+        </div>
+      </div>`;
+  },
+
+  closeBalancePaymentModal: function() {
+    const modal = document.getElementById('balancePaymentModal');
+    if (modal) modal.remove();
+  },
+
+  confirmBalancePayment: function(bookingId) {
+    const bookings = JSON.parse(localStorage.getItem(STORAGE_KEYS.BOOKINGS) || '[]');
+    const booking = bookings.find(x => String(x.id) === String(bookingId));
+    if (!booking) {
+      console.error('Booking not found:', bookingId);
+      return;
+    }
+
+    booking.amountPaid = booking.totalAmount;
+    booking.remainingBalance = 0;
+    booking.paymentStatus = 'Fully Paid';
+
+    localStorage.setItem(STORAGE_KEYS.BOOKINGS, JSON.stringify(bookings));
+    this.closeBalancePaymentModal();
+    alert('Balance paid. Thank you!');
+
+    // Refresh the My Bookings list
+    if (typeof this.renderMyBookings === 'function') this.renderMyBookings();
+    else location.reload();
+  },
 
 // START A NEW BOOKING USING DETAILS FROM BOOKING HISTORY
 startNewBookingFromHistory: function(bookingId) {
@@ -2568,12 +2740,28 @@ startNewBookingFromHistory: function(bookingId) {
     const bookings = this.getBookings();
     const booking = bookings.find(b => b.id === bookingId);
     if (!booking) return;
+    if (!booking) return;
+
+    // Same-pet rebooking rule (14 days for bath/maintenance, 28 days for haircut packages)
+    const info = {
+      petId: booking.petId,
+      petName: booking.pet.name,
+      species: booking.pet.species,
+      breed: booking.pet.breed,
+      bookingType: booking.bookingType,
+      packageId: booking.packageId
+    };
+    const ruleMsg = this.checkRebookingRule(info, dateStr, booking.id);
+    if (ruleMsg) {
+      alert(ruleMsg);
+      return;
+    }
 
     // Check capacity first
-    const cap = this.getShiftCapacityInfo(dateStr, shiftId);
-    if (cap.isFull) {
-      alert('Selected shift has no available slots. Please choose another shift.');
-      return;
+    const passed = this.isShiftPassed(dateStr, shift);
+      if (cap.isFull || passed) {
+        opt.disabled = true;
+        opt.textContent += passed ? ' [TIME PASSED]' : ' [FULL]';
     }
 
     // Reserve new slot before releasing old slot
@@ -2785,7 +2973,10 @@ startNewBookingFromHistory: function(bookingId) {
     if (nameEl) nameEl.value = this.currentUser.name || '';
     if (emailEl) emailEl.value = this.currentUser.email || '';
     if (phoneEl) phoneEl.value = this.currentUser.phone || '';
-    if (bdayEl) bdayEl.value = this.currentUser.birthdate || '';
+    if (bdayEl) {
+      if (bdayEl._flatpickr) bdayEl._flatpickr.setDate(this.currentUser.birthdate || null, false);
+      else bdayEl.value = this.currentUser.birthdate || '';
+    }
   },
 
   renderPetsView: function() {
@@ -2800,7 +2991,12 @@ startNewBookingFromHistory: function(bookingId) {
     if (e) e.preventDefault();
     this.currentUser.name = document.getElementById('profileNameInput').value.trim();
     this.currentUser.phone = document.getElementById('profilePhoneInput').value.trim();
-    this.currentUser.birthdate = document.getElementById('profileBirthdateInput').value;
+    const newBirth = document.getElementById('profileBirthdateInput').value;
+    if (newBirth && !this.isValidAge(newBirth)) {
+      alert('You must be between 19 and 45 years old.');
+      return;
+    }
+    this.currentUser.birthdate = newBirth;
 
     saveCurrentUser(this.currentUser, !sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER));
 
@@ -3351,3 +3547,6 @@ handleResetPassword: function(e) {
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });
+
+// block for birthdate picker
+document.addEventListener('DOMContentLoaded', () => App.initBirthdatePickers());
