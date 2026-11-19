@@ -125,7 +125,8 @@ const SERVICE_DATA = {
     { id: 'shift_3', name: 'Shift 3 (Evening)', time: '5:00 PM – 9:00 PM', startHour: 17, durationHours: 4, maxCapacity: 3 }
   ],
 
-  // Table 6: Weight Ranges
+  // Table 6: Weight Ranges (Giant: 31 kg up to 100 kg maximum)
+  maxWeightKg: 100,
   getCategoryFromWeight: function(weightKg) {
     const w = parseFloat(weightKg);
     if (isNaN(w) || w <= 0) return 'Small';
@@ -1050,8 +1051,16 @@ const App = {
     this.updateLiveRunningSummary();
   },
 
-  onWeightChanged: function() {
-    const weightVal = parseFloat(document.getElementById('inputPetWeight').value);
+    onWeightChanged: function() {
+    const input = document.getElementById('inputPetWeight');
+    const weightVal = parseFloat(input.value);
+
+    if (weightVal > SERVICE_DATA.maxWeightKg) {
+      alert(`The maximum pet weight we can accept is ${SERVICE_DATA.maxWeightKg} kg (Giant size).`);
+      input.value = this.bookingDraft.weight;
+      return;
+    }
+
     if (!isNaN(weightVal) && weightVal > 0) {
       this.bookingDraft.weight = weightVal;
       this.bookingDraft.sizeCategory = SERVICE_DATA.getCategoryFromWeight(weightVal);
@@ -1632,6 +1641,11 @@ const App = {
 
   onPetFormWeightChanged: function() {
     const w = parseFloat(document.getElementById('petFormWeight').value);
+    if (w > SERVICE_DATA.maxWeightKg) {
+      alert(`The maximum pet weight we can accept is ${SERVICE_DATA.maxWeightKg} kg (Giant size).`);
+      document.getElementById('petFormWeight').value = this.bookingDraft.weight;
+      return;
+    }
     if (!isNaN(w) && w > 0) {
       this.bookingDraft.weight = w;
       const oldSize = this.bookingDraft.sizeCategory;
@@ -1709,6 +1723,11 @@ const App = {
     }
     if (isNaN(weight) || weight <= 0) {
       alert('Please enter a valid pet weight in kilograms.');
+      return;
+    }
+
+    if (weight > SERVICE_DATA.maxWeightKg) {
+      alert(`The maximum pet weight we can accept is ${SERVICE_DATA.maxWeightKg} kg (Giant size).`);
       return;
     }
 
@@ -3372,6 +3391,11 @@ openEditPetModal: function(petId) {
 
     if (!name || !breed || isNaN(weight) || weight <= 0) {
       alert('Please fill out all required pet fields (Name, Breed, Weight).');
+      return;
+    }
+
+    if (weight > SERVICE_DATA.maxWeightKg) {
+      alert(`The maximum pet weight we can accept is ${SERVICE_DATA.maxWeightKg} kg (Giant size).`);
       return;
     }
 
