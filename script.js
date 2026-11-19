@@ -246,6 +246,72 @@ function generateBookingReferenceNumber() {
   return String(lastNo).padStart(10, '0');
 }
 
+const Draft = {
+  KEY: 'furbubbles_draft',
+  STEP_NAMES: { 1: 'Services', 2: 'Schedule', 3: 'Account', 4: 'Pet details', 5: 'Review', 6: 'Payment' },
+
+  get() {
+    try { return JSON.parse(localStorage.getItem(this.KEY)); }
+    catch { return null; }
+  },
+
+  save(step, data, form) {
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify({ step, data, form: form || {}, updatedAt: Date.now() }));
+    } catch (e) { console.warn('Could not save draft', e); }
+    this.render();
+  },
+
+  clear() {
+    localStorage.removeItem(this.KEY);
+    this.render();
+  },
+
+  render() {
+    document.getElementById('draft-fab')?.remove();
+    const d = this.get();
+    const bookingView = document.getElementById('booking-view');
+    const onBookingScreen = bookingView && bookingView.classList.contains('active');
+    if (!d || onBookingScreen) return;
+
+    // A payment-step draft only counts while its booking is still On Hold
+    if (d.step === 6) {
+      const holdId = d.data && d.data.activeHoldBookingId;
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.BOOKINGS) || '[]');
+      const hold = list.find(b => b.id === holdId);
+      if (!hold || hold.bookingStatus !== 'On Hold') {
+        localStorage.removeItem(this.KEY);
+        return;
+      }
+    }
+
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    const petName = (d.form && d.form.petName) || (d.data && d.data.petName) || '';
+    const stepName = this.STEP_NAMES[d.step] || '';
+
+    const fab = document.createElement('div');
+    fab.id = 'draft-fab';
+    fab.innerHTML = `
+      <a class="draft-main" href="booking.html?resume=1">
+        <span class="draft-icon">🐾</span>
+        <span class="draft-text">
+          <strong>Continue your booking</strong>
+          <small>${petName ? esc(petName) + ' · ' : ''}Step ${d.step} of 6${stepName ? ' · ' + stepName : ''}</small>
+        </span>
+      </a>
+      <button class="draft-close" aria-label="Discard draft" title="Discard draft">×</button>`;
+    fab.querySelector('.draft-close').addEventListener('click', () => {
+      if (confirm('Discard your unfinished booking?')) Draft.clear();
+    });
+    document.body.appendChild(fab);
+  }
+};
+
+// Show on every page load
+document.addEventListener('DOMContentLoaded', () => Draft.render());
+// Also updates if another tab changes/discards the draft
+window.addEventListener('storage', e => { if (e.key === Draft.KEY) Draft.render(); });
+
 // APP CORE CONTROLLER
 const App = {
   currentView: 'home-view',
@@ -301,6 +367,9 @@ const App = {
   },
 
   init: function() {
+    // If we arrived from the draft button, grab the saved draft BEFORE anything can overwrite it
+    this.resumeData = (new URLSearchParams(window.location.search).get('resume') === '1') ? Draft.get() : null;
+    this.restoring = !!this.resumeData;
     initializeDefaultData();
     this.currentUser = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER) || localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null');
     this.migrateLegacyBookings();
@@ -329,6 +398,8 @@ const App = {
         this.routeTo(firstSection.id);
     }
 
+    if (urlParams.get('resume') === '1') this.resumeDraft();
+
     // Header "Sign In" on other pages opens the standalone sign-in screen
     // Opened from the password-reset link: show the sign-in page behind the "new password" form
 
@@ -344,6 +415,7 @@ const App = {
       this.checkAndExpireHolds();
       this.checkPastBookings();
     }, 10000);
+      Draft.render();
   },
 
   // Older saved bookings may have no amountPaid; work it out so they don't show PHP 0
@@ -413,6 +485,7 @@ const App = {
     } else if (viewId === 'services-view') {
       this.renderServicesAndPricelist();
     }
+      Draft.render();
   },
 
   updateUserNavigation: function() {
@@ -749,6 +822,7 @@ const App = {
     } else if (stepNumber === 7) {
       this.renderConfirmationStep();
     }
+      this.saveDraft();
   },
 
   // STEP 1: SELECT SERVICES
@@ -1096,6 +1170,7 @@ const App = {
     this.bookingDraft.date = dateStr;
     this.renderCalendar();
     this.renderShiftsList();
+    this.saveDraft();
   },
 
     // Allowed birthdates: age 19 to 45
@@ -1250,6 +1325,7 @@ const App = {
     if (!cap.isFull && !this.isShiftPassed(this.bookingDraft.date, shift)) {
       this.bookingDraft.shiftId = shiftId;
       this.renderShiftsList();
+      this.saveDraft();
     }
   },
 
@@ -2150,6 +2226,88 @@ const App = {
     }
   },
 
+  // Save the current booking progress (steps 1-6)
+  saveDraft: function() {
+    if (this.restoring) return;
+    if (this.standaloneAuth || this.currentStep < 1 || this.currentStep > 6) return;
+
+    let form = {};
+    if (this.currentStep === 4) {
+      const val = id => (document.getElementById(id) || {}).value || '';
+      const sp = document.querySelector('input[name="petSpeciesRadio"]:checked');
+      form = {
+        petName: val('petFormName'),
+        breed: val('petFormBreed'),
+        weight: val('petFormWeight'),
+        careNotes: val('petFormCareNotes'),
+        species: sp ? sp.value : ''
+      };
+    }
+    Draft.save(this.currentStep, Object.assign({}, this.bookingDraft), form);
+  },
+
+    resumeDraft: function() {
+    const saved = this.resumeData || Draft.get();
+    this.resumeData = null;
+
+    if (!saved || !saved.data) {
+      this.restoring = false;
+      return;
+    }
+
+    this.standaloneAuth = false;
+
+    // Payment step: only resume if the hold is still active
+    if (saved.step === 6) {
+      const hold = this.getBookings().find(b => b.id === saved.data.activeHoldBookingId);
+      if (!hold || hold.bookingStatus !== 'On Hold') {
+        this.restoring = false;
+        Draft.clear();
+        alert('This booking hold is no longer active. Please start a new booking.');
+        return;
+      }
+    }
+
+    Object.assign(this.bookingDraft, saved.data);
+
+    // A saved date that has already passed is dropped
+    if (saved.step < 6 && this.bookingDraft.date && this.bookingDraft.date < getFormattedDateStr(new Date())) {
+      this.bookingDraft.date = '';
+      this.bookingDraft.shiftId = '';
+    }
+    if (this.bookingDraft.date) {
+      const [y, m] = this.bookingDraft.date.split('-').map(Number);
+      this.calendarYear = y;
+      this.calendarMonth = m - 1;
+    }
+
+    this.routeTo('booking-view');
+    this.setupBookingStep(saved.step || 1);
+
+    // Put back what was typed on the pet form
+    if (this.currentStep === 4 && saved.form) {
+      const f = saved.form;
+      const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+      set('petFormName', f.petName);
+      set('petFormBreed', f.breed);
+      set('petFormWeight', f.weight);
+      set('petFormCareNotes', f.careNotes);
+      const radio = document.getElementById(f.species === 'Cat' ? 'speciesCat' : 'speciesDog');
+      if (radio) radio.checked = true;
+    }
+
+    // Restore finished: saving is allowed again
+    this.restoring = false;
+    this.saveDraft();
+    history.replaceState({}, '', window.location.pathname);
+  },
+
+  // Exit the booking process (progress stays saved as a draft)
+  exitBooking: function() {
+    this.standaloneAuth = false;
+    this.routeTo(this.currentUser ? 'my-bookings-view' : 'home-view');
+  },
+
   // RESET DRAFT AND START FRESH BOOKING
     startNewBooking: function() {
     // Exit standalone sign-in mode
@@ -2757,15 +2915,32 @@ startNewBookingFromHistory: function(bookingId) {
       return;
     }
 
-    // Check capacity first
-    const passed = this.isShiftPassed(dateStr, shift);
-      if (cap.isFull || passed) {
-        opt.disabled = true;
-        opt.textContent += passed ? ' [TIME PASSED]' : ' [FULL]';
+    // Find the chosen shift
+    const shift = SERVICE_DATA.shifts.find(s => s.id === shiftId);
+    if (!shift) {
+      alert('Please select a valid shift.');
+      return;
+    }
+
+    // Same slot as the current one: nothing to change
+    if (dateStr === booking.appointmentDate && shift.id === booking.shiftId) {
+      alert('This is already your current appointment slot. Please choose a different date or shift.');
+      return;
+    }
+
+    // Check capacity before reserving the new slot
+    const cap = this.getShiftCapacityInfo(dateStr, shift.id);
+    if (cap.isFull) {
+      alert('Sorry, that shift is now fully booked. Please choose another shift or date.');
+      return;
+    }
+    if (this.isShiftPassed(dateStr, shift)) {
+      alert('That shift has already started. Please choose another shift.');
+      return;
     }
 
     // Reserve new slot before releasing old slot
-    const shift = SERVICE_DATA.shifts.find(s => s.id === shiftId);
+
     const oldSlot = `${formatDateReadable(booking.appointmentDate)} - ${booking.shiftName}`;
     booking.appointmentDate = dateStr;
     booking.shiftId = shift.id;
@@ -3235,6 +3410,7 @@ openEditPetModal: function(petId) {
   handleLogout: function() {
     if (confirm('Are you sure you want to log out?')) {
       this.currentUser = null;
+      Draft.clear();
       localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       this.updateUserNavigation();
@@ -3521,6 +3697,22 @@ handleResetPassword: function(e) {
 
   // EVENT LISTENERS INITIALIZATION
   initEventListeners: function() {
+    // Exit button on the booking page
+    const stepperEl = document.querySelector('.stepper-wrapper');
+    if (stepperEl && !document.getElementById('exitBookingBtn')) {
+      const exitBtn = document.createElement('button');
+      exitBtn.id = 'exitBookingBtn';
+      exitBtn.type = 'button';
+      exitBtn.className = 'exit-booking-btn';
+      exitBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>Exit booking</span>`;
+      exitBtn.addEventListener('click', () => App.exitBooking());
+      stepperEl.parentNode.insertBefore(exitBtn, stepperEl);
+    }
+
     // Account Menu Dropdown Toggle
     const accBtn = document.getElementById('accountMenuToggleBtn');
     const accDropdown = document.getElementById('accountDropdown');
@@ -3540,8 +3732,35 @@ handleResetPassword: function(e) {
         document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
       });
     });
+
+    // Save pet form progress as the customer types
+    document.addEventListener('input', (e) => {
+      if (e.target.closest && e.target.closest('#bookingStep4')) App.saveDraft();
+    });
   }
 };
+
+// Save the draft every time the booking step changes
+(function () {
+  const originalSetup = App.setupBookingStep;
+  App.setupBookingStep = function (n) {
+    originalSetup.call(this, n);
+    // Opening step 1 alone is not a draft; wait until the customer picks something
+    if (n === 1 && !this.step1Touched && !Draft.get()) return;
+    this.saveDraft();
+  };
+
+  // Save whenever something is chosen on step 1
+  ['selectPackage', 'switchServiceTab', 'toggleAlaCarte', 'toggleAddon', 'onWeightChanged'].forEach(name => {
+    const original = App[name];
+    App[name] = function (...args) {
+      const result = original.apply(this, args);
+      this.step1Touched = true;
+      this.saveDraft();
+      return result;
+    };
+  });
+})();
 
 // Initialize App when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
