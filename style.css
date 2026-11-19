@@ -297,6 +297,7 @@ a:hover {
   box-shadow: 0 3px 10px rgba(49, 87, 44, 0.25);
   white-space: nowrap;
   border: none;
+  order: 1;
 }
 
 .nav-actions .btn-primary:hover {
@@ -429,6 +430,7 @@ a:hover {
    ===================================================================== */
 .account-menu-container {
   position: relative;
+  order: 2;
 }
 
 .account-btn {
@@ -1935,6 +1937,80 @@ a:hover {
 .status-partially-paid{ background: #fff9c4; color: #f57f17; }
 .status-fully-paid    { background: #e8f5e9; color: var(--color-forest); }
 
+/* ===== My Bookings + Booking History headers: mobile layout ===== */
+@media (max-width: 767px) {
+  #my-bookings-view .step-header,
+  #booking-history-view .step-header {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  /* Title + subtitle always first */
+  #my-bookings-view .step-header > div:has(h2),
+  #booking-history-view .step-header > div:has(h2) {
+    order: 1;
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #my-bookings-view .step-header h2,
+  #booking-history-view .step-header h2 {
+    font-size: 1.35rem;
+    overflow-wrap: anywhere;
+  }
+
+  #my-bookings-view .step-header p,
+  #booking-history-view .step-header p {
+    font-size: 0.9rem;
+  }
+
+  /* Controls below the title, left-aligned */
+  #my-bookings-view .step-header > div:not(:has(h2)),
+  #booking-history-view .step-header > div:not(:has(h2)) {
+    order: 2;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  /* Booking History: Filter and Sort By share one row */
+  #booking-history-view .step-header > div:not(:has(h2)) > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  #booking-history-view .step-header > div:not(:has(h2)) label {
+    white-space: nowrap;
+  }
+
+  #booking-history-view .step-header > div:not(:has(h2)) select {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+    padding: 6px 28px 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  /* My Bookings: Sort By stays at its natural width on the left */
+  #my-bookings-view .step-header > div:not(:has(h2)) select {
+    flex: 0 1 auto;
+    width: auto;
+  }
+}
+
 /* =====================================================================
    31. TABLES
    ===================================================================== */
@@ -2357,11 +2433,6 @@ a:hover {
         min-width: 560px;
     }
 
-    .step-header {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
     .booking-card-top {
         flex-wrap: wrap;
         gap: 8px;
@@ -2445,22 +2516,51 @@ a:hover {
   gap: 16px;
   flex-wrap: nowrap;
 }
-.step-header > div {
+.step-header > div:first-child {
   flex: 1;
   min-width: 0;          /* lets the long subtitle wrap inside its own space */
 }
+.step-header > div:not(:first-child) {
+  flex: 0 0 auto;        /* button group keeps its own size, stays on the right */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;       /* lets Filter / Sort By drop to a second line */
+  max-width: 100%;       /* never wider than the header */
+  justify-content: flex-end;
+}
+
 .step-header > .btn {
   flex-shrink: 0;
   white-space: nowrap;
 }
 
-/* On small phones: button moves above the title, still on the right */
+/* On small phones: buttons move above the title, still on the right */
 @media (max-width: 520px) {
   .step-header { flex-wrap: wrap; }
-  .step-header > .btn {
+  .step-header > .btn,
+  .step-header > div:not(:first-child) {
     order: -1;
     margin-left: auto;
   }
+}
+
+/* Page headers: spacing from the edges, button centered on the right */
+.view-section > .step-header {
+  align-items: center;       /* button sits in the middle, level with title + subtitle */
+  padding: 22px 32px;        /* space at the left and right edges */
+}
+
+/* Softer, more polished button on these headers */
+.view-section > .step-header .btn {
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(15, 47, 71, .12);
+}
+
+@media (max-width: 520px) {
+  .view-section > .step-header { padding: 16px 18px; }
 }
 
 /* ===== Booking History: Filter & Sort By dropdowns ===== */
@@ -2688,6 +2788,11 @@ a:hover {
   transform: translateX(-2px);
 }
 
+body.standalone-auth #exitBookingBtn,
+body.standalone-auth .exit-booking-btn {
+display: none !important;
+}
+
 /* ===== Birthdate picker (Flatpickr) ===== */
 .flatpickr-calendar {
   border-radius: 16px;
@@ -2736,3 +2841,4 @@ a:hover {
 
 .flatpickr-calendar { z-index: 10000 !important; }
 .flatpickr-day.flatpickr-disabled { text-decoration: line-through; opacity: 0.4; }
+

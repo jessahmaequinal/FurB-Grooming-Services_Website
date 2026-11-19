@@ -273,7 +273,8 @@ const Draft = {
     const d = this.get();
     const bookingView = document.getElementById('booking-view');
     const onBookingScreen = bookingView && bookingView.classList.contains('active');
-    if (!d || onBookingScreen) return;
+    const signedIn = !!(localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER));
+    if (!d || onBookingScreen || !signedIn) return;
 
     // A payment-step draft only counts while its booking is still On Hold
     if (d.step === 6) {
@@ -311,7 +312,7 @@ const Draft = {
 // Show on every page load
 document.addEventListener('DOMContentLoaded', () => Draft.render());
 // Also updates if another tab changes/discards the draft
-window.addEventListener('storage', e => { if (e.key === Draft.KEY) Draft.render(); });
+window.addEventListener('storage', e => { if (e.key === Draft.KEY || e.key === STORAGE_KEYS.CURRENT_USER) Draft.render(); });
 
 // APP CORE CONTROLLER
 const App = {
@@ -472,10 +473,11 @@ const App = {
     if (viewId === 'home-view') {
       this.updateHomeGreeting();
     } else if (viewId === 'booking-view') {
+    // Normal booking should not remain in standalone auth mode
     if (!this.standaloneAuth) {
-        this.setupBookingStep(1);
+      this.setupBookingStep(1);
     }
-    } else if (viewId === 'my-bookings-view') {
+    }else if (viewId === 'my-bookings-view') {
       this.renderMyBookings();
     } else if (viewId === 'booking-history-view') {
       this.renderBookingHistory();
@@ -486,6 +488,10 @@ const App = {
     } else if (viewId === 'services-view') {
       this.renderServicesAndPricelist();
     }
+    // Synchronize Exit Booking visibility after every navigation
+      this.syncExitButton();
+
+      // Refresh Draft visibility
       Draft.render();
   },
 
@@ -758,7 +764,7 @@ const App = {
 
     // Guests cannot go past the sign-in step
     if (!this.currentUser && stepNumber >= 4) {
-      alert('Please sign in or create an account to continue your booking.');
+      alert('Please create an account to continue your booking.');
       stepNumber = 3;
     }
     // A date and shift must be chosen before steps 3-5
@@ -1341,18 +1347,21 @@ const App = {
     // STEP 3: AUTHENTICATION (Sign In / Register / Simulated OAuth)
   standaloneAuth: false,
 
-    // Sign In / Create Account on its own (not part of a booking)
+    // Sign In (not part of a booking)
     openStandaloneAuth: function() {
-        if (this.currentUser) {
-            this.routeTo('my-bookings-view');
-            return;
-        }
+      if (this.currentUser) {
+        this.routeTo('my-bookings-view');
+        return;
+      }
 
-        // Set standalone mode BEFORE opening the booking page
-        this.standaloneAuth = true;
+      // Enable standalone authentication mode
+      this.standaloneAuth = true;
 
-        this.routeTo('booking-view');
-        this.setupBookingStep(3);
+      this.routeTo('booking-view');
+      this.setupBookingStep(3);
+
+      // Hide Exit Booking on standalone Sign In
+      this.syncExitButton();
     },
 
   // After login/register: continue the booking, or go to My Bookings if standalone
@@ -2321,6 +2330,19 @@ const App = {
     history.replaceState({}, '', window.location.pathname);
   },
 
+    syncExitButton: function() {
+      const btn = document.getElementById('exitBookingBtn');
+
+      // Hide Exit Booking whenever standalone authentication is active
+      const hideButton = this.standaloneAuth === true;
+
+      document.body.classList.toggle('standalone-auth', hideButton);
+
+      if (btn) {
+        btn.style.display = hideButton ? 'none' : '';
+      }
+    },
+
   // Exit the booking process (progress stays saved as a draft)
   exitBooking: function() {
     this.standaloneAuth = false;
@@ -2468,7 +2490,7 @@ const App = {
 
             <div style="display:flex; flex-direction:column; gap:8px;">
               ${isOnHold ? `
-                <button class="btn btn-primary btn-sm" onclick="App.resumePayment('${b.id}')">Pay Now (On Hold)</button>
+                <button class="btn btn-primary btn-sm" onclick="App.openBalancePaymentModal('${b.id}')">💳 Pay Balance Now</button>
                 <button class="btn btn-rose btn-sm" onclick="App.cancelBookingFromList('${b.id}')">Cancel Slot</button>
               ` : `
                 <button class="btn btn-navy btn-sm" onclick="App.openRescheduleModal('${b.id}')">Reschedule</button>
@@ -3722,19 +3744,27 @@ handleResetPassword: function(e) {
   // EVENT LISTENERS INITIALIZATION
   initEventListeners: function() {
     // Exit button on the booking page
-    const stepperEl = document.querySelector('.stepper-wrapper');
+    const bookingView = document.getElementById('booking-view');
+    const stepperEl = bookingView?.querySelector('.stepper-wrapper');
+
     if (stepperEl && !document.getElementById('exitBookingBtn')) {
       const exitBtn = document.createElement('button');
+
       exitBtn.id = 'exitBookingBtn';
       exitBtn.type = 'button';
       exitBtn.className = 'exit-booking-btn';
+      
       exitBtn.innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7"/>
         </svg>
         <span>Exit booking</span>`;
+
       exitBtn.addEventListener('click', () => App.exitBooking());
+
       stepperEl.parentNode.insertBefore(exitBtn, stepperEl);
+      
+      App.syncExitButton();
     }
 
     // Account Menu Dropdown Toggle

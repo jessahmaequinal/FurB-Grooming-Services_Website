@@ -287,7 +287,7 @@
         </div>
       </div>
 
-      <!-- ================= STEP 3: SIGN IN / CREATE ACCOUNT ================= -->
+      <!-- ================= STEP 3: CREATE ACCOUNT ================= -->
       <div id="bookingStep3" class="booking-wizard-step">
         <div class="step-header">
           <div>
@@ -307,7 +307,8 @@
           <form id="authLoginForm" onsubmit="App.handleLogin(event)">
             <div class="form-group">
               <label class="form-label" for="loginEmailInput">Email Address</label>
-                <input type="email" id="loginEmailInput" class="form-input" required placeholder="name@example.com">            </div>
+                <input type="email" id="loginEmailInput" class="form-input" required placeholder="name@example.com">            
+              </div>
             <div class="form-group">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <label class="form-label" for="loginPasswordInput">Password</label>
@@ -801,7 +802,6 @@
           <h2>Manage Customer Account</h2>
           <p style="color:var(--color-text-muted);">Update personal information and contact settings.</p>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="App.handleLogout()">Log Out</button>
       </div>
 
       <div style="max-width: 620px; margin: 0 auto; background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:28px; box-shadow: var(--shadow-sm);">
@@ -833,7 +833,7 @@
 
           <!-- CHANGE PASSWORD SECTION -->
           <div class="form-group" style="margin-top:24px;">
-            <label class="form-label">Change Password</label>
+            <label class="form-label">Password</label>
 
             <button
               type="button"
@@ -899,7 +899,7 @@
 
           <div style="display:flex; gap:12px; margin-top:24px;">
             <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
-            <button type="button" class="btn btn-outline" onclick="App.routeTo('pets-view')">🐾 View My Pets</button>
+            <button type="button" class="btn btn-outline" onclick="App.renderProfileView()">Cancel</button>
           </div>
         </form>
       </div>
@@ -914,7 +914,6 @@
         </div>
         <div style="display:flex; gap:10px;">
           <button class="btn btn-accent btn-sm" onclick="App.openAddPetModal()">+ Add New Pet</button>
-          <button class="btn btn-outline btn-sm" onclick="App.handleLogout()">Log Out</button>
         </div>
       </div>
 
