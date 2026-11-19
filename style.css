@@ -2437,6 +2437,32 @@ a:hover {
   color: #666;
 }
 
+/* Back button stays at the upper right of every step header */
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+.step-header > div {
+  flex: 1;
+  min-width: 0;          /* lets the long subtitle wrap inside its own space */
+}
+.step-header > .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* On small phones: button moves above the title, still on the right */
+@media (max-width: 520px) {
+  .step-header { flex-wrap: wrap; }
+  .step-header > .btn {
+    order: -1;
+    margin-left: auto;
+  }
+}
+
 /* ===== Booking History: Filter & Sort By dropdowns ===== */
 #booking-history-view .step-header select {
   appearance: none;
